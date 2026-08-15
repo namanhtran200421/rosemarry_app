@@ -1,7 +1,7 @@
 --migration:up
 
 --not sure what to put here yet
-create type verification_type_enum as enum ()
+create type verification_type_enum as enum ('PASSPORT', 'DRIVERS_LICENSE')
 create type verification_status_enum as enum ('PENDING', 'APPROVED', 'REJECTED', 'EXPIRED');
 
 create table id_verifications (
