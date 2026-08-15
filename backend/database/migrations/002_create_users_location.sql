@@ -7,7 +7,7 @@ create table users_location (
     city varchar(100),
     state varchar(100),
     country VARCHAR(100),
-    location_updated_at timestamp not null default now(),
+    location_updated_at timestamptz not null default now(),
 
     constraint pk_users_location primary key (user id),
     constraint fk_users_location_user

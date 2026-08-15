@@ -8,8 +8,8 @@ create table profiles(
     bio text,
     dating_goal dating_goal_enum,
     display_name varchar(100) not null,
-    updated_at timestamp not null default now(),
-    created_at timestamp not null default now(),
+    updated_at timestamptz not null default now(),
+    created_at timestamptz not null default now(),
 
     constraint pk_profiles primary key (user_id),
     constraint fk_profiles_user
