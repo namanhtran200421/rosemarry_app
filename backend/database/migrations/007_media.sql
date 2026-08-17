@@ -6,7 +6,7 @@ create table medias (
     file_size_bytes bigint not null, 
     created_at timestamptz not null default now(),  
 
-    constraint pk_media primary key (media_id)
+    constraint pk_media primary key (media_id),
     constraint chk_media_file_size check (file_size_bytes >= 0)  
 );
 
