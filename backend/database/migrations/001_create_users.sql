@@ -1,11 +1,12 @@
 -- migrate:up
 
 -- Enums Types Goes Here
-create type accoout_status_enum as enum (
+create type account_status_enum as enum (
     'ACTIVE',
     'SUSPENDED',
     'DELETED'
-)
+);
+create type user_role_enum as enum ('USER', 'STAFF');
 -- Tables Goes Here
 create table users (
     user_id INTEGER generated always as identity,
@@ -19,7 +20,7 @@ create table users (
     constraint uq_users_auth_provider_user_id unique (auth_provider_user_id)
 
     
-    )
+);
 
 -- migrate:down
 drop table if exist users;
