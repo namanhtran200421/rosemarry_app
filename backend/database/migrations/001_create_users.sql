@@ -1,13 +1,10 @@
 -- migrate:up
-
--- Enums Types Goes Here
 create type account_status_enum as enum (
     'ACTIVE',
     'SUSPENDED',
     'DELETED'
 );
 create type user_role_enum as enum ('USER', 'STAFF');
--- Tables Goes Here
 create table users (
     user_id INTEGER generated always as identity,
     auth_provider_user_id varchar(255) NOT NULL,
@@ -23,5 +20,6 @@ create table users (
 );
 
 -- migrate:down
-drop table if exist users;
-drop type if exist account_status_enum;
+drop table if exists users;
+drop type if exists account_status_enum;
+drop type if exists user_role_enum;

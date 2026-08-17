@@ -30,3 +30,4 @@ create table id_verifications (
 --migrate:down
 drop table if exists id_verifications;
 drop type if exists verification_type_enum;
+drop type if exists verification_status_enum;
