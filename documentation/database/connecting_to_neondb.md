@@ -1,5 +1,4 @@
 1. Log into neonDB, click on the green CONNECT button on the top left. It should show you what to put into your .env file - paste it. 
-NOTE: THE PREFIX SHOULD BE ```postgres://....```, because dbmate doesn't recognize ```postgresql://....```
 
 2. test_db.ts gives an example function for how to connect to neonDB. 
 
