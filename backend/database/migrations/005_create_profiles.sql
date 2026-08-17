@@ -1,5 +1,5 @@
 --migrate:up
-create type dating_goal_enum as enum ('LONG_TERM_RELATIONSHIP', 'CASUAL_DATING', 'FRIENDSHIP', 'UNSURE')
+create type dating_goal_enum as enum ('LONG_TERM_RELATIONSHIP', 'CASUAL_DATING', 'FRIENDSHIP', 'UNSURE');
 
 create table profiles(
     user_id integer NOT NULL,
@@ -21,6 +21,5 @@ create table profiles(
 );
 
 --migrate:down
-drop table if exists profiles
-drop type if exists dating_goal_enum
-
+drop table if exists profiles;
+drop type if exists dating_goal_enum;
