@@ -5,6 +5,7 @@ create table genders (
     updated_at timestamptz not null default now(),
 
     constraint pk_genders primary key (gender_id),
+    constraint uq_genders_gender_name unique (gender_name)
 )
 
 --migrate:down
