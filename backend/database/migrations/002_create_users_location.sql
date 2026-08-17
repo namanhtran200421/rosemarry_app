@@ -9,10 +9,10 @@ create table users_location (
     country VARCHAR(100),
     location_updated_at timestamptz not null default now(),
 
-    constraint pk_users_location primary key (user id),
+    constraint pk_users_location primary key (user_id),
     constraint fk_users_location_user
         foreign key (user_id) references users (user_id)
         on delete cascade
-)
+);
 --migrate:down
 drop table if exists users_location;
