@@ -1,6 +1,4 @@
---migration:up
-
---not sure what to put here yet
+--migrate:up
 create type verification_type_enum as enum (
     'PASSPORT',
     'DRIVERS_LICENSE',
@@ -30,5 +28,6 @@ create table id_verifications (
 );
 
 --migrate:down
-drop table if exists id_verifications
-drop type if exists verification_type_enum
+drop table if exists id_verifications;
+drop type if exists verification_type_enum;
+drop type if exists verification_status_enum;

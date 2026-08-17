@@ -11,7 +11,7 @@ constraint pk_profile_photo primary key(user_id, media_id),
 constraint fk_profile_id foreign key (user_id) references profiles(user_id)
 on delete cascade,
 
-constraint fk_media_id foreign key (media_id) references media(media_id)
+constraint fk_media_id foreign key (media_id) references medias(media_id)
 on delete cascade, 
 
 constraint uq_profile_photo_media 
