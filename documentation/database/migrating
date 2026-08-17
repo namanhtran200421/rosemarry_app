@@ -1,0 +1,2 @@
+1. To migrate **up** with dbmate, run ```dbmate migrate```. This will migrate up starting from migration file 001, then 002, and so on.
+2. To migrate **down** with dbmate, run ```dbmate down```. This will migrate down from the most recent **up** migration.
