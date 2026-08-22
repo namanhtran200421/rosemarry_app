@@ -5,7 +5,6 @@ export class AppError extends Error{
     readonly statusCode: number;
     readonly code: string;
     readonly details?: unknown;
-    readonly cause?: unknown;
 
     // the constructor follow object AppErrorOption
     public constructor({
@@ -17,5 +16,6 @@ export class AppError extends Error{
         this.statusCode = statusCode;
         this.code = code;
         this.details = details;
+        
     }
 }
