@@ -4,8 +4,8 @@ create table interests(
     interest_name not null varchar(100),
     slug not null varchar(100),
     is_active not null BOOLEAN,
-    created_at not null timestamptz  default now(),
-    updated_at not null timestamptz 
+    created_at not null timestamptz default now(),
+    updated_at not null timestamptz default now(),
    
 
     constraint pk_interest primary key(interest_id)
