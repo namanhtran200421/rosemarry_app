@@ -1,7 +1,7 @@
 -- migrate:up
 create table profile_interests(
-    user_id integer generated always as identity, 
-    interest_id integer generated always as identity,
+    user_id integer,
+    interest_id integer,
     created_at timestamptz not null default now(),
 
     constraint pk_profile_interests primary key(user_id, interest_id)
