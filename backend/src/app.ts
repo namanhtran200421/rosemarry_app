@@ -2,11 +2,16 @@ import express from "express"
 import type {Request, Response} from "express"
 import pool from "./config/database"
 import cors from "cors"
+import { errorHandler, notFound } from "./middleware/errorHandler";
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
+/**
+ * 
+ * 
+ */
 app.get('/health', async function(req:Request, res:Response){
   try {
     const result = await pool.query('select now() as current_time');
@@ -21,5 +26,8 @@ app.get('/health', async function(req:Request, res:Response){
     });
   }
 })
+
+app.use(notFound)
+app.use(errorHandler)
 
 export default app;
