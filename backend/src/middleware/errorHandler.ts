@@ -14,9 +14,6 @@ function isJsonSyntaxErr(
   return err instanceof SyntaxError && "status" in err && err.status === 400;
 }
 
-function isAppError(err:unknown): err is AppError{
-    return (typeof err == 'object' && err !== null && 'statusCode' in err && 'code' in err && 'message' in err)
-};
 
 /**
  * console.error logs errors
