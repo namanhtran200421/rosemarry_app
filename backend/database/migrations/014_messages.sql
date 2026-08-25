@@ -15,7 +15,7 @@ CREATE TABLE messages (
     CONSTRAINT message_text_has_body CHECK (message_type <> 'text' OR (body IS NOT NULL AND length(btrim(body)) > 0)),
 
     CONSTRAINT messages_conversation_message_unique
-        UNIQUE (conversation_id, message_id),
+        UNIQUE (conversation_id, message_id)
 );
 
 --migrate:down
