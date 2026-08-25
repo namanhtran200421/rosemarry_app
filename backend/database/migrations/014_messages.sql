@@ -12,7 +12,7 @@ CREATE TABLE messages (
 
     CONSTRAINT message_system_has_no_sender CHECK (message_type <> 'system' OR user_id IS NULL),
 
-    CONSTRAINT message_text_has_body CHECK (message_type <> 'text' OR (body IS NOT NULL AND length(btrim(body)) > 0))
+    CONSTRAINT message_text_has_body CHECK (message_type <> 'text' OR (body IS NOT NULL AND length(btrim(body)) > 0)),
 
     CONSTRAINT messages_conversation_message_unique
         UNIQUE (conversation_id, message_id),
