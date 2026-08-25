@@ -17,7 +17,7 @@ CREATE TABLE conversations(
         OR (type = 'direct' AND cycle_id IS NULL AND dm_key IS NOT NULL)
     ),
 
-    CONSTRAINT conversations_dm_key_unique UNIQUE (dm_key),
+    CONSTRAINT conversations_dm_key_unique UNIQUE (dm_key)
 );
 
 --migrate:down
