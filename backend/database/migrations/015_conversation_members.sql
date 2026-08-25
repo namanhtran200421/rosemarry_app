@@ -17,7 +17,5 @@ CREATE TABLE conversation_members (
         ON DELETE SET NULL (last_read_message_id)
 );
 
-);
-
 --migrate:down
 drop table if exists conversation_members;
