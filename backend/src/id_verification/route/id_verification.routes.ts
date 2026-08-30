@@ -18,7 +18,14 @@ function readUserId(req: Request): number | undefined {
     return Number.isInteger(user?.id) ? (user?.id as number) : undefined;
 }
  
-
+/**
+ * Creates a Didit session and returns the hosted URL for the client.
+ * Uses User ID to verify that the requester is authenticated.
+ *
+ * @param req - incoming request
+ * @param res - the http response
+ * @param next - passes failures to errorHandler
+ */
 const startVerification: RequestHandler = async function (req, res, next) {
     const userId = readUserId(req);
  
