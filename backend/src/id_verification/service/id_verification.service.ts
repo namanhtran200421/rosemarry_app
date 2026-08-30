@@ -1,5 +1,11 @@
 import { AppError } from "../../errors/appError.js";
- 
+
+/**
+ * reads a required environment variable and rejects quoted values
+ *
+ * @param name - the environment variable to read
+ * @returns the trimmed value
+ */
 function required(name: string): string {
     const raw = process.env[name];
  
@@ -45,7 +51,14 @@ export interface DiditSession {
     vendor_data?: string;
     workflow_id?: string;
 }
- 
+
+/**
+ * reserves a verification session with Didit and returns a hosted URL
+ * result will arrive later through the webhook
+ *
+ * @param userId internal users.user_id, sent as vendor_data and echoed back on the webhook
+ * @returns the created session, including the URL to send the user to
+ */
 export async function createSession(userId: number): Promise<DiditSession> {
     let response: Response;
  

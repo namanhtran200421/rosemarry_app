@@ -26,11 +26,18 @@ const STATUS_MAP: Record<DiditStatus, VerificationStatus> = {
     "Kyc Expired": "EXPIRED",
 };
 
+
+/**
+ * translates a Didit status into the database enum
+ *
+ * @param status - the status string from a session or webhook
+ * @returns the matching verification_status_enum value
+ */
 export function toVerificationStatus(status: DiditStatus): VerificationStatus {
     return STATUS_MAP[status];
 }
 
- 
+/** matches postgres rows */
 interface VerificationRow {
     verification_id: number;
     user_id: number;
@@ -56,7 +63,13 @@ const RETURNED_COLUMNS = `
     created_at,
     updated_at
 `;
- 
+
+/**
+ * Helper function that converts a database row to camelCase for convenience
+ *
+ * @param row - a row from id_verifications
+ * @returns the mapped record
+ */
 function toRecord(row: VerificationRow): VerificationRecord {
     return {
         verificationId: row.verification_id,
@@ -71,7 +84,14 @@ function toRecord(row: VerificationRow): VerificationRecord {
         updatedAt: row.updated_at,
     };
 }
- 
+
+/**
+ * Helper function that asserts a query returned at least one row
+ *
+ * @param rows - result rows from a query expected to return one
+ * @param context - what was being queried (for the error message)
+ * @returns the first row
+ */
 function expectOne<T>(rows: T[], context: string): T {
     const row = rows[0];
  
@@ -83,11 +103,40 @@ function expectOne<T>(rows: T[], context: string): T {
 }
  
 export interface VerificationRepo {
+     /**
+     * records a session that has been created but not yet attempted
+     *
+     * verification_type is left null because no document has been presented,
+     * and users who pass facial estimation wont need to 
+     *
+     * @param userId - internal users.user_id the attempt belongs to
+     * @param sessionId - Didit's session id stored as provider_reference
+     * @returns the inserted row
+     */
     createPending(userId: number, sessionId: string): Promise<VerificationRecord>;
+    
+    /**
+     * finds a user's most recent attempt
+     *
+     * @param userId - the user to look up
+     * @returns the newest row, or null if they have never started one
+     */
     findLatestByUserId(userId: number): Promise<VerificationRecord | null>;
+
+     /**
+     * checks whether the user has ever been approved
+     *
+     * expires_at is deliberately ignored because
+     * someone verified as over 18 will forever remain verified
+     * though this may change in the future if re-verification is required
+     *
+     * @param userId - the user to check
+     * @returns true if any attempt reached APPROVED
+     */
     isUserVerified(userId: number): Promise<boolean>;
 }
- 
+
+
 export const verificationRepo: VerificationRepo = {
     async createPending(userId, sessionId) {
         const { rows } = await pool.query<VerificationRow>(
