@@ -92,7 +92,7 @@ function toRecord(row: VerificationRow): VerificationRecord {
  * @param context - what was being queried (for the error message)
  * @returns the first row
  */
-function expectOne<T>(rows: T[], context: string): T {
+function verifyRow<T>(rows: T[], context: string): T {
     const row = rows[0];
  
     if (!row) {
@@ -147,7 +147,7 @@ export const verificationRepo: VerificationRepo = {
             [userId, PROVIDER, sessionId],
         );
  
-        return toRecord(expectOne(rows, "insert into id_verifications"));
+        return toRecord(verifyRow(rows, "insert into id_verifications"));
     },
  
     async findLatestByUserId(userId) {
