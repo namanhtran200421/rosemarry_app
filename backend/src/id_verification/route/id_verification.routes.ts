@@ -1,4 +1,4 @@
-import { Router, type Request, type RequestHandler } from "express";
+import { Response, Router, type Request, type RequestHandler } from "express";
  
 import { AppError } from "../../errors/appError.js";
 import { createSession } from "../service/id_verification.service.js";
@@ -26,7 +26,7 @@ function readUserId(req: Request): number | undefined {
  * @param res - the http response
  * @param next - passes failures to errorHandler
  */
-const startVerification: RequestHandler = async function (req, res, next) {
+const startVerification: RequestHandler = async function (req:Request, res:Response, next) {
     const userId = readUserId(req);
  
     if (userId === undefined) {
