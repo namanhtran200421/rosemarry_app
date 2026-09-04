@@ -1,13 +1,13 @@
 import { StyleSheet, Text, View } from "react-native";
 
-import { colors, radii, spacing, typography } from "../theme/tokens";
+import { colors, fonts, radii, spacing, typography } from "../theme/tokens";
 
-interface InlineMessageProps {
+interface ErrorMessageProps {
   message: string;
-  tone: "error";
 }
 
-export function InlineMessage({ message, tone: _tone }: InlineMessageProps) {
+/** Persistent inline error with an assertive accessibility announcement. */
+export function ErrorMessage({ message }: ErrorMessageProps) {
   return (
     <View
       accessibilityLiveRegion="assertive"
@@ -26,14 +26,15 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.lg,
     paddingVertical: spacing.md,
     borderLeftWidth: 3,
-    borderRadius: radii.sm,
-    borderColor: colors.danger,
+    borderRadius: radii.md,
+    borderColor: colors.dangerStrong,
     backgroundColor: colors.dangerSurface,
     justifyContent: "center",
   },
   text: {
-    color: colors.danger,
-    fontSize: typography.body.fontSize,
-    lineHeight: typography.body.lineHeight,
+    color: colors.dangerStrong,
+    fontFamily: fonts.regular,
+    fontSize: typography.callout.fontSize,
+    lineHeight: typography.callout.lineHeight,
   },
 });

@@ -1,7 +1,6 @@
 import { type ReactNode, useState } from "react";
 import {
   ActivityIndicator,
-  Platform,
   Pressable,
   StyleSheet,
   Text,
@@ -9,7 +8,15 @@ import {
   type ViewStyle,
 } from "react-native";
 
-import { colors, radii, spacing, typography } from "../theme/tokens";
+import {
+  colors,
+  fonts,
+  layout,
+  motion,
+  radii,
+  spacing,
+  typography,
+} from "../theme/tokens";
 
 type ButtonIntent = "primary" | "neutral" | "danger";
 
@@ -19,7 +26,6 @@ interface AppButtonProps {
   intent?: ButtonIntent;
   disabled?: boolean;
   busy?: boolean;
-  iosOnly?: boolean;
   accessibilityHint?: string;
   style?: StyleProp<ViewStyle>;
   leadingIcon?: ReactNode;
@@ -31,16 +37,11 @@ export function AppButton({
   intent = "primary",
   disabled = false,
   busy = false,
-  iosOnly = false,
   accessibilityHint,
   style,
   leadingIcon,
 }: AppButtonProps) {
   const [isFocused, setIsFocused] = useState(false);
-
-  if (iosOnly && Platform.OS !== "ios") {
-    return null;
-  }
 
   const isDisabled = disabled || busy;
   const palette = buttonPalettes[intent];
@@ -57,21 +58,17 @@ export function AppButton({
       style={({ pressed }) => [
         styles.button,
         {
-          backgroundColor: pressed ? palette.pressed : palette.background,
-          borderColor: palette.border,
-          opacity: isDisabled ? 0.55 : 1,
-          shadowColor: isFocused ? colors.focus : "transparent",
-          shadowOpacity: isFocused ? 1 : 0,
+          backgroundColor: palette.background,
+          borderColor: isFocused ? colors.focus : palette.border,
+          opacity: isDisabled ? 0.45 : 1,
+          transform: [{ scale: pressed ? motion.pressScale : 1 }],
         },
         style,
       ]}
     >
       {leadingIcon}
       <Text
-        style={[
-          styles.label,
-          { color: palette.text, opacity: busy ? 0 : 1 },
-        ]}
+        style={[styles.label, { color: palette.text, opacity: busy ? 0 : 1 }]}
       >
         {label}
       </Text>
@@ -86,46 +83,46 @@ export function AppButton({
   );
 }
 
+/**
+ * Press feedback is a quiet scale-down rather than a color flip, per the
+ * design. `danger` keeps a visible outlined affordance so destructive
+ * actions stay discoverable.
+ */
 const buttonPalettes = {
   primary: {
     background: colors.primary,
-    pressed: colors.primaryPressed,
     border: colors.primary,
-    text: colors.surface,
+    text: colors.onPrimary,
   },
   neutral: {
     background: colors.surface,
-    pressed: colors.background,
     border: colors.border,
     text: colors.text,
   },
   danger: {
     background: colors.dangerSurface,
-    pressed: colors.border,
-    border: colors.danger,
-    text: colors.danger,
+    border: colors.dangerStrong,
+    text: colors.dangerStrong,
   },
 } as const;
 
 const styles = StyleSheet.create({
   button: {
-    minHeight: 48,
-    minWidth: 48,
+    minHeight: layout.fieldHeight,
+    minWidth: layout.controlHeight,
     paddingHorizontal: spacing.xl,
     paddingVertical: spacing.md,
     borderWidth: 1,
-    borderRadius: radii.md,
+    borderRadius: radii.lg,
     alignItems: "center",
     justifyContent: "center",
     flexDirection: "row",
     gap: spacing.sm,
-    shadowOffset: { width: 0, height: 0 },
-    shadowRadius: 3,
   },
   label: {
+    fontFamily: fonts.semibold,
     fontSize: typography.button.fontSize,
     lineHeight: typography.button.lineHeight,
-    fontWeight: "600",
   },
   spinner: {
     position: "absolute",

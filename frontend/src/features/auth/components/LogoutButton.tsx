@@ -2,8 +2,8 @@ import { useState } from "react";
 import { View } from "react-native";
 
 import { AppButton } from "../../../shared/ui/AppButton";
-import { InlineMessage } from "../../../shared/ui/InlineMessage";
-import { useAuthSession } from "../session/AuthSessionProvider";
+import { ErrorMessage } from "../../../shared/ui/ErrorMessage";
+import { useAuthSession } from "../session/AuthSessionContext";
 import { getAuthenticationErrorMessage } from "../utils/auth-error-message";
 
 export function LogoutButton() {
@@ -31,9 +31,7 @@ export function LogoutButton() {
         }}
       />
 
-      {errorMessage !== null ? (
-        <InlineMessage tone="error" message={errorMessage} />
-      ) : null}
+      {errorMessage !== null ? <ErrorMessage message={errorMessage} /> : null}
     </View>
   );
 }

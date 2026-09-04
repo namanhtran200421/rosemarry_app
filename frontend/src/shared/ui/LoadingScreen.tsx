@@ -1,7 +1,7 @@
 import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import { colors, spacing, typography } from "../theme/tokens";
+import { colors, fonts, spacing, typography } from "../theme/tokens";
 
 interface LoadingScreenProps {
   label: string;
@@ -34,7 +34,8 @@ const styles = StyleSheet.create({
     gap: spacing.lg,
   },
   label: {
-    color: colors.textMuted,
+    color: colors.textSecondary,
+    fontFamily: fonts.regular,
     fontSize: typography.body.fontSize,
     lineHeight: typography.body.lineHeight,
   },

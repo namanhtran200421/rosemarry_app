@@ -1,7 +1,12 @@
 import { StyleSheet, Text, View } from "react-native";
 
 import { LogoutButton } from "../../auth/components/LogoutButton";
-import { colors, spacing, typography } from "../../../shared/theme/tokens";
+import {
+  colors,
+  fonts,
+  spacing,
+  typography,
+} from "../../../shared/theme/tokens";
 import { Screen } from "../../../shared/ui/Screen";
 
 export function HomeScreen() {
@@ -27,19 +32,20 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
   },
   eyebrow: {
-    color: colors.primary,
+    color: colors.link,
+    fontFamily: fonts.bold,
     fontSize: typography.caption.fontSize,
-    fontWeight: "700",
     letterSpacing: 2,
   },
   title: {
     color: colors.text,
+    fontFamily: fonts.bold,
     fontSize: typography.title.fontSize,
-    fontWeight: "700",
     lineHeight: typography.title.lineHeight,
   },
   description: {
     color: colors.textMuted,
+    fontFamily: fonts.regular,
     fontSize: typography.body.fontSize,
     lineHeight: typography.body.lineHeight,
   },

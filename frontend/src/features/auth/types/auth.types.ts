@@ -1,8 +1,7 @@
-export type LoginConnection = "phone" | "google" | "apple";
-
 export type AuthSessionStatus =
   | "initializing"
   | "unauthenticated"
-  | "authenticating"
+  | "sending-code"
+  | "verifying-code"
   | "authenticated"
   | "logging-out";

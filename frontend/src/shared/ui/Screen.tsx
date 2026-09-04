@@ -2,7 +2,7 @@ import type { PropsWithChildren } from "react";
 import { ScrollView, StyleSheet } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import { colors, spacing } from "../theme/tokens";
+import { colors, layout, spacing } from "../theme/tokens";
 
 export function Screen({ children }: PropsWithChildren) {
   return (
@@ -25,10 +25,10 @@ const styles = StyleSheet.create({
   screen: {
     flexGrow: 1,
     width: "100%",
-    maxWidth: 440,
+    maxWidth: layout.contentMaxWidth,
     alignSelf: "center",
     justifyContent: "center",
-    paddingHorizontal: spacing.xl,
+    paddingHorizontal: layout.screenPadX,
     paddingVertical: spacing.xxl,
   },
 });
