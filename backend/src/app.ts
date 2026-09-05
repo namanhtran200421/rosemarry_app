@@ -3,6 +3,7 @@ import type {Request, Response} from "express"
 import pool from "./config/database"
 import cors from "cors"
 import { errorHandler, notFound } from "./middleware/errorHandler";
+import verificationRouter from "./id_verification/route/id_verification.routes.js";
 
 const app = express();
 app.use(cors());
@@ -27,6 +28,7 @@ app.get('/health', async function(req:Request, res:Response){
   }
 })
 
+app.use("/verification", verificationRouter);
 app.use(notFound)
 app.use(errorHandler)
 
