@@ -1,17 +1,15 @@
-import cors from "cors";
+import pool from "./config/database"
+import cors from "cors"
+import { errorHandler, notFound } from "./middleware/errorHandler";
+import verificationRouter from "./id_verification/route/id_verification.routes.js";
 import express, { type Request, type Response } from "express";
-
 import {
   requireApplicationUser,
   validateAccessToken,
 } from "./middleware/auth.middleware";
 import authRouter from "./authentication/route/auth.route";
-import pool from "./config/database.js";
 import idVerificationRouter from "./id_verification/route/id_verification.routes.js";
-import {
-  errorHandler,
-  notFound,
-} from "./middleware/errorHandler.js";
+
 
 const app = express();
 
@@ -64,6 +62,9 @@ app.get("/health", async function (_req: Request, res: Response) {
  */
 app.use("/api/v1/auth", authRouter);
 
+app.use("/verification", verificationRouter);
+app.use(notFound)
+app.use(errorHandler)
 /*
  * Product endpoints use two authentication layers:
  *

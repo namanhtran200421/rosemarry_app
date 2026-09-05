@@ -3,13 +3,21 @@
 import "dotenv/config";
  
 import { createSession } from "../id_verification/service/id_verification.service.js";
+import {
+    verificationRepo,
+} from "../id_verification/repository/id_verification.repo.js";
 
-const TEST_USER_ID = 1;
+const TEST_USER_ID = 2;
  
 async function main(): Promise<void> {
     console.log("creating session for user", TEST_USER_ID);
  
     const session = await createSession(TEST_USER_ID);
+    await verificationRepo.createPending(TEST_USER_ID, session.session_id);
+
+
+
+    console.log(session.url);
  
     console.log("\nsession created");
     console.log("  session_id  ", session.session_id);
