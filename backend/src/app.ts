@@ -1,23 +1,15 @@
-import express from "express"
-import type {Request, Response} from "express"
 import pool from "./config/database"
 import cors from "cors"
 import { errorHandler, notFound } from "./middleware/errorHandler";
 import verificationRouter from "./id_verification/route/id_verification.routes.js";
-import cors from "cors";
 import express, { type Request, type Response } from "express";
-
 import {
   requireApplicationUser,
   validateAccessToken,
 } from "./middleware/auth.middleware";
 import authRouter from "./authentication/route/auth.route";
-import pool from "./config/database.js";
 import idVerificationRouter from "./id_verification/route/id_verification.routes.js";
-import {
-  errorHandler,
-  notFound,
-} from "./middleware/errorHandler.js";
+
 
 const app = express();
 
