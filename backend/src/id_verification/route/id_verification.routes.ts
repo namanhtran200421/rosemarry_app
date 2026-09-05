@@ -1,21 +1,20 @@
-import { Router, type Request, type RequestHandler } from "express";
+import { Response, Router, type Request, type RequestHandler } from "express";
  
 import { AppError } from "../../errors/appError.js";
 import { createSession } from "../service/id_verification.service.js";
 import { verificationRepo } from "../repository/id_verification.repo.js";
 
-/*
- * This exists as a placeholder as auth isn't pushed yet. every
- * reference to req.user in this module goes through here, so adopting the real
- * auth layer will be a change to this function
+/**
+ * Returns the internal Rosemarry user ID populated by
+ * requireApplicationUser.
  *
- * Will req.user.id  be the internal integer or the provider's auth_provider_user_id string? The foreign key will need the internal integer
+ * Keeping the undefined case provides defense in depth if the router is ever
+ * mounted without its required authentication middleware.
+ * 
+ * Steve fix: simpified the function.
  */
 function readUserId(req: Request): number | undefined {
-    const { user } = req as Request & { user?: { id?: unknown } };
- 
-    // Number.isInteger rather than typeof, so an id parsed from a token with Number() cannot slip through as NaN and fail later on the foreign key
-    return Number.isInteger(user?.id) ? (user?.id as number) : undefined;
+  return req.user?.id;
 }
  
 /**
@@ -26,7 +25,7 @@ function readUserId(req: Request): number | undefined {
  * @param res - the http response
  * @param next - passes failures to errorHandler
  */
-const startVerification: RequestHandler = async function (req, res, next) {
+const startVerification: RequestHandler = async function (req:Request, res:Response, next) {
     const userId = readUserId(req);
  
     if (userId === undefined) {
