@@ -1,78 +1,33 @@
-import { Button, StyleSheet, Text, View } from 'react-native';
-import { Auth0Provider, useAuth0 } from 'react-native-auth0';
+import {
+  DynaPuff_400Regular,
+  DynaPuff_500Medium,
+  DynaPuff_600SemiBold,
+  DynaPuff_700Bold,
+  useFonts,
+} from "@expo-google-fonts/dynapuff";
 
-function HomeScreen() {
-  const { authorize, clearSession, user, isLoading } = useAuth0();
-
-const handleLogin = async () => {
-  try {
-    await authorize(
-      {
-        connection: 'email',
-        scope: 'openid profile email',
-      },
-      {
-        customScheme: 'rosemarry',
-      }
-    );
-  } catch (error) {
-    console.error('Login failed:', error);
-  }
-};
-
-const handleLogout = async () => {
-  try {
-    await clearSession(
-      {},
-      {
-        customScheme: 'rosemarry',
-      }
-    );
-  } catch (error) {
-    console.error('Logout failed:', error);
-  }
-};
-
-  
-  if (isLoading) {
-    return (
-      <View style={styles.container}>
-        <Text>Loading...</Text>
-      </View>
-    );
-  }
-
-  return (
-    <View style={styles.container}>
-      {user ? (
-        <>
-          <Text>Logged in as:</Text>
-          <Text>{user.email}</Text>
-
-          <Button title="Log out" onPress={handleLogout} />
-        </>
-      ) : (
-        <Button title="Log in" onPress={handleLogin} />
-      )}
-    </View>
-  );
-}
+import { AppNavigator } from "./src/application/navigation/AppNavigator";
+import { AppProviders } from "./src/application/providers/AppProviders";
+import { LoadingScreen } from "./src/shared/ui/LoadingScreen";
 
 export default function App() {
+  const [fontsLoaded, fontError] = useFonts({
+    DynaPuff_400Regular,
+    DynaPuff_500Medium,
+    DynaPuff_600SemiBold,
+    DynaPuff_700Bold,
+  });
+
+  // A font failure falls through to the system face rather than blocking sign-in.
+  const canRender = fontsLoaded || fontError !== null;
+
   return (
-    <Auth0Provider
-      domain={process.env.EXPO_PUBLIC_AUTH0_DOMAIN!}
-      clientId={process.env.EXPO_PUBLIC_AUTH0_CLIENT_ID!}
-    >
-      <HomeScreen />
-    </Auth0Provider>
+    <AppProviders>
+      {canRender ? (
+        <AppNavigator />
+      ) : (
+        <LoadingScreen label="Preparing Rosemarry" />
+      )}
+    </AppProviders>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});

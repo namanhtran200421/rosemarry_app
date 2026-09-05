@@ -1,23 +1,43 @@
 {
-  "name": "frontend",
+  "name": "rosemarry-mobile",
   "version": "1.0.0",
+  "description": "Rosemarry mobile application",
   "main": "index.ts",
   "dependencies": {
-    "expo": "~57.0.12",
-    "expo-status-bar": "~57.0.1",
+    "@expo-google-fonts/dynapuff": "^0.4.3",
+    "@expo/vector-icons": "^15.0.2",
+    "@react-navigation/native": "^7.3.18",
+    "@react-navigation/native-stack": "^7.18.10",
+    "expo": "~57.0.19",
+    "expo-font": "~57.0.3",
     "react": "19.2.3",
-    "react-native": "0.86.2",
-    "react-native-auth0": "^5.11.0"
+    "react-native": "0.86.3",
+    "react-native-auth0": "^5.11.0",
+    "react-native-safe-area-context": "~5.7.0",
+    "react-native-screens": "~4.26.0"
   },
   "devDependencies": {
     "@types/react": "~19.2.2",
-    "typescript": "~6.0.3"
+    "dotenv": "^17.4.2",
+    "eslint": "^9.39.5",
+    "eslint-config-expo": "~57.0.2",
+    "expo-doctor": "^1.20.4",
+    "prettier": "^3.9.6",
+    "typescript": "~6.0.3",
+    "vitest": "^5.0.0"
   },
   "scripts": {
     "start": "expo start",
     "android": "expo run:android",
     "ios": "expo run:ios",
-    "web": "expo start --web"
+    "web": "expo start --web",
+    "check": "npm run format:check && npm run typecheck && npm run lint && npm run test",
+    "doctor": "expo-doctor",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "lint": "eslint .",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
   },
   "private": true
 }

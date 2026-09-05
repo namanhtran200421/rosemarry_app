@@ -1,15 +1,11 @@
-import dotenv from 'dotenv'
-import app from "./app.js"
+import app from "./app.js";
+import { env } from "./config/env.js";
 
-dotenv.config();
+const server = app.listen(env.port, function () {
+  console.log(`Server listening on port ${env.port}`);
+});
 
-const PORT = process.env.PORT;
-
-app.listen(PORT, function(err:unknown){
-  if(!err){
-    console.log(`Server on ${PORT}`)
-  } else {
-    console.log("error", err)
-  }
-})
-
+server.on("error", function (error) {
+  console.error("Server failed to start", error);
+  process.exitCode = 1;
+});
