@@ -133,7 +133,7 @@ export async function createSession(userId: number): Promise<DiditSession> {
 }
  
 /**
- * rebuilds Didit's canonical json form, with keys sorted recursively
+ * rebuilds Didit's json format and sorts keys recursively
  *
  * JSON.stringify already produces compact separators and leaves unicode
  * unescaped, so ordering keys is the only transform needed. whole-valued

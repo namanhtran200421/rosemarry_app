@@ -13,7 +13,6 @@ async function main(): Promise<void> {
     console.log("creating session for user", TEST_USER_ID);
  
     const session = await createSession(TEST_USER_ID);
-    console.log("got", session.session_id)
     await verificationRepo.createPending(TEST_USER_ID, session.session_id);
 
 
