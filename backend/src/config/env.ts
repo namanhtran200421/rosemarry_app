@@ -12,7 +12,7 @@ function getEnvironmentVariable (name:string): string {
 export const env = {
     port: Number(process.env.PORT),
     auth0: {
-        issueBaseUrl: getEnvironmentVariable('AUTH0_ISSUE_BASE_URL'),
+        issuerBaseUrl: getEnvironmentVariable('AUTH0_ISSUER_BASE_URL'),
     audience: getEnvironmentVariable('AUTH0_AUDIENCE')
 },
 }

@@ -15,6 +15,8 @@ export class ApplicationSessionError extends Error {
   }
 }
 
+
+
 /**
  * Exchanges an Auth0 access token for Rosemarry's application-level session.
  * The response is checked at runtime because network data cannot be trusted from
@@ -82,3 +84,4 @@ function isApplicationSession(value: unknown): value is ApplicationSession {
     typeof session.profileExists === "boolean"
   );
 }
+

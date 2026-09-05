@@ -10,6 +10,8 @@ type AuthenticatedStackParamList = {
   Home: undefined;
 };
 
+
+
 const Stack = createNativeStackNavigator<AuthenticatedStackParamList>();
 
 /** Routes available after an application session has been established. */
