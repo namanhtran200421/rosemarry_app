@@ -106,6 +106,9 @@ const handleWebhook: RequestHandler = async function (req, res) {
  
         return;
     }
+
+   if (typeof event.event_id !== "string" || event.event_id.legnth === 0 || typeof event.session_id !== "string" || event.session_id.legnth === 0)}
+
  
     // v3 deliveries carry no event id, so the idempotency key is derived. a
     // session reaches each status once, and a retry repeats both fields, so
@@ -113,11 +116,13 @@ const handleWebhook: RequestHandler = async function (req, res) {
     // x-request-id is not usable for this: it sits alongside sentry trace
     // headers and is generated per http request, so a retry would get a fresh
     // one and be processed as new
-    const eventKey = `${event.session_id}:${event.status}`;
+
+   // steve fix: use event_id for no duplicate flag
+    const eventId = event.event_id;
  
     try {
         const result = await verificationRepo.applyWebhookStatus(
-            eventKey,
+            eventId,
             event.session_id,
             toVerificationStatus(event.status),
         );
@@ -125,7 +130,7 @@ const handleWebhook: RequestHandler = async function (req, res) {
         console.log({
             scope: "didit",
             action: "webhookProcessed",
-            eventKey,
+            eventId,
             sessionId: event.session_id,
             status: event.status,
             result,
