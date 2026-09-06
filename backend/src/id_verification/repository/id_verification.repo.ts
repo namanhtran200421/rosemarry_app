@@ -1,11 +1,17 @@
 import pool from "../../config/database.js";
 import type { VerificationStatus, VerificationType } from "../types/verification_types.js";
 import type { DiditStatus } from "../service/id_verification.service.js";
- import type { VerificationRecord } from "../types/verification_types.js";
-
+import type { VerificationRecord } from "../types/verification_types.js";
  
 /* every row this module writes is ours */
 const PROVIDER = "didit";
+ 
+/** outcome of applying one webhook delivery, for logging */
+export type WebhookApplyResult =
+    | "applied"
+    | "duplicate"
+    | "unknown_session"
+    | "already_approved";
  
 /**
  * collapses Didit's ten statuses onto the five in verification_status_enum
@@ -25,8 +31,8 @@ const STATUS_MAP: Record<DiditStatus, VerificationStatus> = {
     Expired: "EXPIRED",
     "Kyc Expired": "EXPIRED",
 };
-
-
+ 
+ 
 /**
  * translates a Didit status into the database enum
  *
@@ -36,7 +42,7 @@ const STATUS_MAP: Record<DiditStatus, VerificationStatus> = {
 export function toVerificationStatus(status: DiditStatus): VerificationStatus {
     return STATUS_MAP[status];
 }
-
+ 
 /** matches postgres rows */
 interface VerificationRow {
     verification_id: number;
@@ -63,7 +69,7 @@ const RETURNED_COLUMNS = `
     created_at,
     updated_at
 `;
-
+ 
 /**
  * Helper function that converts a database row to camelCase for convenience
  *
@@ -84,7 +90,7 @@ function toRecord(row: VerificationRow): VerificationRecord {
         updatedAt: row.updated_at,
     };
 }
-
+ 
 /**
  * Helper function that asserts a query returned at least one row
  *
@@ -122,7 +128,7 @@ export interface VerificationRepo {
      * @returns the newest row, or null if they have never started one
      */
     findLatestByUserId(userId: number): Promise<VerificationRecord | null>;
-
+ 
      /**
      * checks whether the user has ever been approved
      *
@@ -134,9 +140,31 @@ export interface VerificationRepo {
      * @returns true if any attempt reached APPROVED
      */
     isUserVerified(userId: number): Promise<boolean>;
+ 
+    /**
+     * claims an event id and applies its status in a single transaction
+     *
+     * both halves must commit together. claiming without applying would mark
+     * the delivery processed while leaving the row untouched, and since a
+     * retry is then rejected as a duplicate, that status would never land
+     *
+     * rows already at APPROVED are left alone. age does not lapse, so a later
+     * Declined or Expired must not revoke a verification, and deliveries can
+     * arrive out of order
+     *
+     * @param eventId - the delivery's event_id, reused across retries
+     * @param sessionId - Didit's session id, matched against provider_reference
+     * @param status - the mapped verification_status_enum value
+     * @returns what happened, for logging
+     */
+    applyWebhookStatus(
+        eventId: string,
+        sessionId: string,
+        status: VerificationStatus,
+    ): Promise<WebhookApplyResult>;
 }
-
-
+ 
+ 
 export const verificationRepo: VerificationRepo = {
     async createPending(userId, sessionId) {
         const { rows } = await pool.query<VerificationRow>(
@@ -177,5 +205,65 @@ export const verificationRepo: VerificationRepo = {
         );
  
         return rows[0]?.verified ?? false;
+    },
+ 
+    async applyWebhookStatus(eventId, sessionId, status) {
+        const client = await pool.connect();
+ 
+        try {
+            await client.query("begin");
+ 
+            const claim = await client.query(
+                `insert into verification_events (event_id)
+                 values ($1)
+                 on conflict (event_id) do nothing
+                 returning event_id`,
+                [eventId],
+            );
+ 
+            if ((claim.rowCount ?? 0) === 0) {
+                await client.query("rollback");
+ 
+                return "duplicate";
+            }
+ 
+            const updated = await client.query(
+                `update id_verifications
+                 set status = $1::verification_status_enum,
+                     verified_at = case
+                         when $1::verification_status_enum = 'APPROVED' and verified_at is null
+                         then now()
+                         else verified_at
+                     end
+                 where provider = $2
+                   and provider_reference = $3
+                   and status <> 'APPROVED'
+                 returning verification_id`,
+                [status, PROVIDER, sessionId],
+            );
+ 
+            await client.query("commit");
+ 
+            if ((updated.rowCount ?? 0) > 0) {
+                return "applied";
+            }
+ 
+            // either no row for this session, or it was already approved.
+            // both are benign, so this only sharpens the log line
+            const existing = await pool.query<{ status: VerificationStatus }>(
+                `select status
+                 from id_verifications
+                 where provider = $1 and provider_reference = $2`,
+                [PROVIDER, sessionId],
+            );
+ 
+            return existing.rows[0] ? "already_approved" : "unknown_session";
+        } catch (error) {
+            await client.query("rollback").catch(() => undefined);
+ 
+            throw error;
+        } finally {
+            client.release();
+        }
     },
 };
