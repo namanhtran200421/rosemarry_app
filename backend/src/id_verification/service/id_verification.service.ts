@@ -63,6 +63,7 @@ export interface DiditSession {
 }
  
 export interface DiditWebhookEvent {
+    event_id: string;
     webhook_type: string;
     timestamp: number;
     created_at: number;
