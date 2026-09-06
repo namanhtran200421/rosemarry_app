@@ -75,6 +75,14 @@ The mobile bundle contains public Auth0 application identifiers only. Never add
 an Auth0 client secret to the frontend. The Auth0 tenant must have the SMS
 passwordless connection and Passwordless OTP grant enabled.
 
+Email authentication uses Rosemarry's native forms with Auth0's database
+connection. Login exchanges the email/password through Auth0's Password Realm
+grant. Account creation calls Auth0's database sign-up endpoint and then runs
+the same login flow. Passwords remain only in transient field state and are
+cleared after a failed request; they are never sent to the Rosemarry backend.
+The Auth0 native application must allow the Password grant, and the database
+connection must allow sign-ups, for these embedded forms to work.
+
 Authentication concerns are intentionally separated:
 
 - `AuthSessionContext` is the stable contract consumed by screens and

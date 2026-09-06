@@ -13,6 +13,7 @@ interface SegmentedControlProps {
   onChange: (value: string) => void;
   size?: "sm" | "md";
   accessibilityLabel?: string;
+  disabled?: boolean;
 }
 
 /** Pill segmented control. White track, brand border, brand-filled segment. */
@@ -22,6 +23,7 @@ export function SegmentedControl({
   onChange,
   size = "md",
   accessibilityLabel,
+  disabled = false,
 }: SegmentedControlProps) {
   const height = size === "sm" ? 38 : 46;
   const fontSize =
@@ -31,7 +33,7 @@ export function SegmentedControl({
     <View
       accessibilityRole="tablist"
       accessibilityLabel={accessibilityLabel}
-      style={[styles.track, { height }]}
+      style={[styles.track, disabled && styles.trackDisabled, { height }]}
     >
       {options.map((option) => {
         const isActive = option.value === value;
@@ -40,7 +42,8 @@ export function SegmentedControl({
           <Pressable
             key={option.value}
             accessibilityRole="tab"
-            accessibilityState={{ selected: isActive }}
+            accessibilityState={{ selected: isActive, disabled }}
+            disabled={disabled}
             onPress={() => onChange(option.value)}
             style={[
               styles.segment,
@@ -75,6 +78,9 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.primary,
     borderRadius: radii.pill,
+  },
+  trackDisabled: {
+    opacity: 0.45,
   },
   segment: {
     flexDirection: "row",

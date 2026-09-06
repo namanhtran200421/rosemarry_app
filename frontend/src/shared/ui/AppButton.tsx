@@ -5,6 +5,7 @@ import {
   StyleSheet,
   Text,
   type StyleProp,
+  View,
   type ViewStyle,
 } from "react-native";
 
@@ -66,7 +67,15 @@ export function AppButton({
         style,
       ]}
     >
-      {leadingIcon}
+      {leadingIcon ? (
+        <View
+          accessible={false}
+          accessibilityElementsHidden
+          importantForAccessibility="no-hide-descendants"
+        >
+          {leadingIcon}
+        </View>
+      ) : null}
       <Text
         style={[styles.label, { color: palette.text, opacity: busy ? 0 : 1 }]}
       >

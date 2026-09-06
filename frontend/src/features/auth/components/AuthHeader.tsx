@@ -13,17 +13,29 @@ interface AuthHeaderProps {
   title: string;
   description: string;
   onBack?: () => void;
+  /** Uses tighter spacing for longer authentication forms. */
+  compact?: boolean;
+  /** Prevents leaving while a sensitive authentication request is running. */
+  backDisabled?: boolean;
 }
 
-export function AuthHeader({ title, description, onBack }: AuthHeaderProps) {
+export function AuthHeader({
+  title,
+  description,
+  onBack,
+  compact = false,
+  backDisabled = false,
+}: AuthHeaderProps) {
   return (
-    <View style={styles.header}>
+    <View style={[styles.header, compact && styles.headerCompact]}>
       {onBack ? (
-        <View style={styles.backControl}>
-          <BackButton onPress={onBack} />
+        <View
+          style={[styles.backControl, compact && styles.backControlCompact]}
+        >
+          <BackButton disabled={backDisabled} onPress={onBack} />
         </View>
       ) : null}
-      <BrandMark />
+      <BrandMark size={compact ? 48 : 56} />
       <Text style={styles.eyebrow}>ROSEMARRY</Text>
       <Text style={styles.title}>{title}</Text>
       <Text style={styles.description}>{description}</Text>
@@ -35,10 +47,17 @@ const styles = StyleSheet.create({
   backControl: {
     marginBottom: spacing.lg,
   },
+  backControlCompact: {
+    marginBottom: spacing.sm,
+  },
   header: {
     gap: spacing.sm,
     marginBottom: spacing.xxl,
     alignItems: "flex-start",
+  },
+  headerCompact: {
+    gap: spacing.xs,
+    marginBottom: spacing.xl,
   },
   eyebrow: {
     color: colors.link,

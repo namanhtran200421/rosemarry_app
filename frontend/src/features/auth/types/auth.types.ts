@@ -3,5 +3,6 @@ export type AuthSessionStatus =
   | "unauthenticated"
   | "sending-code"
   | "verifying-code"
+  | "signing-in"
   | "authenticated"
   | "logging-out";

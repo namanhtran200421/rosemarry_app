@@ -23,6 +23,11 @@ Do not create one-off replacements for these patterns inside a screen.
 - Signed-out users see Welcome, legal pages, phone entry, and code verification.
 - Phone verification may use a local mock provider, but the screens and their
   validation remain in the route stack.
+- Welcome and phone entry offer Google plus native email/password entry. Google
+  uses Auth0 Universal Login. Native email login has email/password fields;
+  account creation adds password confirmation and signs in after creation.
+- Password values stay in transient form memory only. They are cleared after a
+  failed request and are never logged or stored by the Rosemarry client.
 - Every pushed auth and onboarding screen exposes a back action. Back from the
   first onboarding step signs out and returns to the signed-out flow.
 - Onboarding branches are stored in navigation history, so Back returns to the

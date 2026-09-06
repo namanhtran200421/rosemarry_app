@@ -6,6 +6,7 @@ import { AppButton } from "../../../shared/ui/AppButton";
 import { AppTextInput } from "../../../shared/ui/AppTextInput";
 import { ErrorMessage } from "../../../shared/ui/ErrorMessage";
 import { Screen } from "../../../shared/ui/Screen";
+import { AdditionalSignInOptions } from "../components/AdditionalSignInOptions";
 import { AuthHeader } from "../components/AuthHeader";
 import { useAuthSession } from "../session/AuthSessionContext";
 import { getAuthenticationErrorMessage } from "../utils/auth-error-message";
@@ -17,15 +18,22 @@ import {
 interface LoginScreenProps {
   onCodeSent: (phoneNumber: string) => void;
   onBack: () => void;
+  onContinueWithEmail: () => void;
 }
 
-export function LoginScreen({ onCodeSent, onBack }: LoginScreenProps) {
-  const { requestSmsCode, startupError, status } = useAuthSession();
+export function LoginScreen({
+  onCodeSent,
+  onBack,
+  onContinueWithEmail,
+}: LoginScreenProps) {
+  const { requestSmsCode, status } = useAuthSession();
   const [phoneNumber, setPhoneNumber] = useState("");
   const [fieldError, setFieldError] = useState<string | null>(null);
   const [requestError, setRequestError] = useState<string | null>(null);
   const phoneInputRef = useRef<TextInput>(null);
   const isSending = status === "sending-code";
+  const isAdditionalLoginRunning = status === "signing-in";
+  const isBusy = isSending || isAdditionalLoginRunning;
 
   function handlePhoneNumberChange(value: string): void {
     setPhoneNumber(value);
@@ -34,7 +42,7 @@ export function LoginScreen({ onCodeSent, onBack }: LoginScreenProps) {
   }
 
   async function handleSendCode(): Promise<void> {
-    if (isSending) {
+    if (isBusy) {
       return;
     }
 
@@ -58,8 +66,6 @@ export function LoginScreen({ onCodeSent, onBack }: LoginScreenProps) {
     }
   }
 
-  const displayedError = requestError ?? startupError;
-
   return (
     <Screen>
       <AuthHeader
@@ -82,7 +88,7 @@ export function LoginScreen({ onCodeSent, onBack }: LoginScreenProps) {
           autoCapitalize="none"
           autoCorrect={false}
           returnKeyType="send"
-          editable={!isSending}
+          editable={!isBusy}
           onChangeText={handlePhoneNumberChange}
           onSubmitEditing={() => {
             void handleSendCode();
@@ -92,16 +98,19 @@ export function LoginScreen({ onCodeSent, onBack }: LoginScreenProps) {
         <AppButton
           label="Send verification code"
           busy={isSending}
-          disabled={isSending}
+          disabled={isBusy}
           accessibilityHint="Sends a one-time code to this mobile number"
           onPress={function onPressSendCode() {
             void handleSendCode();
           }}
         />
 
-        {displayedError !== null ? (
-          <ErrorMessage message={displayedError} />
-        ) : null}
+        {requestError !== null ? <ErrorMessage message={requestError} /> : null}
+
+        <AdditionalSignInOptions
+          disabled={isSending}
+          onContinueWithEmail={onContinueWithEmail}
+        />
       </View>
     </Screen>
   );

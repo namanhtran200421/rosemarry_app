@@ -1,7 +1,10 @@
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 
+import { AdditionalSignInOptions } from "../../features/auth/components/AdditionalSignInOptions";
+import { EmailAuthScreen } from "../../features/auth/screens/EmailAuthScreen";
 import { LoginScreen } from "../../features/auth/screens/LoginScreen";
 import { VerifyCodeScreen } from "../../features/auth/screens/VerifyCodeScreen";
+import type { EmailAuthMode } from "../../features/auth/utils/email-credentials";
 import { LegalScreen } from "../../features/onboarding/screens/LegalScreen";
 import {
   PRIVACY_DOCUMENT,
@@ -14,12 +17,13 @@ type AuthStackParamList = {
   Terms: undefined;
   Privacy: undefined;
   Login: undefined;
+  EmailAuth: { initialMode: EmailAuthMode };
   VerifyCode: { phoneNumber: string };
 };
 
 const Stack = createNativeStackNavigator<AuthStackParamList>();
 
-/** Public entry, legal, phone-number, and OTP routes. */
+/** Public entry, legal, phone, email/password, and OTP routes. */
 export function AuthNavigator() {
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
@@ -27,9 +31,18 @@ export function AuthNavigator() {
         {({ navigation }) => (
           <WelcomeScreen
             onStart={() => navigation.navigate("Login")}
-            onSignIn={() => navigation.navigate("Login")}
+            onSignIn={() =>
+              navigation.navigate("EmailAuth", { initialMode: "login" })
+            }
             onOpenTerms={() => navigation.navigate("Terms")}
             onOpenPrivacy={() => navigation.navigate("Privacy")}
+            additionalSignInOptions={
+              <AdditionalSignInOptions
+                onContinueWithEmail={() =>
+                  navigation.navigate("EmailAuth", { initialMode: "create" })
+                }
+              />
+            }
           />
         )}
       </Stack.Screen>
@@ -53,9 +66,20 @@ export function AuthNavigator() {
         {({ navigation }) => (
           <LoginScreen
             onBack={() => navigation.goBack()}
+            onContinueWithEmail={() =>
+              navigation.navigate("EmailAuth", { initialMode: "login" })
+            }
             onCodeSent={(phoneNumber) => {
               navigation.navigate("VerifyCode", { phoneNumber });
             }}
+          />
+        )}
+      </Stack.Screen>
+      <Stack.Screen name="EmailAuth">
+        {({ navigation, route }) => (
+          <EmailAuthScreen
+            initialMode={route.params.initialMode}
+            onBack={() => navigation.goBack()}
           />
         )}
       </Stack.Screen>

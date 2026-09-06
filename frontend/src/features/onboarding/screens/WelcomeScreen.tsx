@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -16,6 +17,8 @@ interface WelcomeScreenProps {
   onSignIn: () => void;
   onOpenTerms: () => void;
   onOpenPrivacy: () => void;
+  /** Authentication choices composed by the app navigation layer. */
+  additionalSignInOptions: ReactNode;
 }
 
 /** The sign-up landing screen: brand mark, wordmark, and the way in. */
@@ -24,6 +27,7 @@ export function WelcomeScreen({
   onSignIn,
   onOpenTerms,
   onOpenPrivacy,
+  additionalSignInOptions,
 }: WelcomeScreenProps) {
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -34,6 +38,7 @@ export function WelcomeScreen({
 
         <View style={styles.actions}>
           <AppButton label="Use phone number" onPress={onStart} />
+          {additionalSignInOptions}
         </View>
 
         <Pressable

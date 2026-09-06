@@ -1,4 +1,4 @@
-import { forwardRef, useState } from "react";
+import { forwardRef, type ReactNode, useState } from "react";
 import {
   StyleSheet,
   Text,
@@ -17,10 +17,12 @@ import {
   typography,
 } from "../theme/tokens";
 
-interface AppTextInputProps extends TextInputProps {
+export interface AppTextInputProps extends TextInputProps {
   label: string;
   helperText?: string;
   errorText?: string;
+  /** Optional control displayed inside the right edge of the input. */
+  trailingControl?: ReactNode;
 }
 
 /** Shared text field with stable help/error space and accessible input states. */
@@ -34,6 +36,7 @@ export const AppTextInput = forwardRef<TextInput, AppTextInputProps>(
       onBlur,
       onFocus,
       style,
+      trailingControl,
       ...textInputProps
     },
     ref,
@@ -45,35 +48,41 @@ export const AppTextInput = forwardRef<TextInput, AppTextInputProps>(
     return (
       <View style={styles.field}>
         <Text style={styles.label}>{label}</Text>
-        <TextInput
-          {...textInputProps}
-          ref={ref}
-          accessibilityLabel={textInputProps.accessibilityLabel ?? label}
-          accessibilityHint={
-            textInputProps.accessibilityHint ??
-            (supportingText.trim() || undefined)
-          }
-          accessibilityState={{ disabled: !editable }}
-          aria-invalid={hasError}
-          editable={editable}
-          onBlur={(event) => {
-            setIsFocused(false);
-            onBlur?.(event);
-          }}
-          onFocus={(event) => {
-            setIsFocused(true);
-            onFocus?.(event);
-          }}
-          placeholderTextColor={colors.textFaint}
-          selectionColor={colors.primary}
-          style={[
-            styles.input,
-            isFocused && styles.inputFocused,
-            hasError && styles.inputError,
-            !editable && styles.inputDisabled,
-            style,
-          ]}
-        />
+        <View style={styles.inputContainer}>
+          <TextInput
+            {...textInputProps}
+            ref={ref}
+            accessibilityLabel={textInputProps.accessibilityLabel ?? label}
+            accessibilityHint={
+              textInputProps.accessibilityHint ??
+              (supportingText.trim() || undefined)
+            }
+            accessibilityState={{ disabled: !editable }}
+            aria-invalid={hasError}
+            editable={editable}
+            onBlur={(event) => {
+              setIsFocused(false);
+              onBlur?.(event);
+            }}
+            onFocus={(event) => {
+              setIsFocused(true);
+              onFocus?.(event);
+            }}
+            placeholderTextColor={colors.textFaint}
+            selectionColor={colors.primary}
+            style={[
+              styles.input,
+              isFocused && styles.inputFocused,
+              hasError && styles.inputError,
+              !editable && styles.inputDisabled,
+              Boolean(trailingControl) && styles.inputWithTrailingControl,
+              style,
+            ]}
+          />
+          {trailingControl ? (
+            <View style={styles.trailingControl}>{trailingControl}</View>
+          ) : null}
+        </View>
         <Text
           accessibilityElementsHidden={!supportingText.trim()}
           accessibilityLiveRegion={hasError ? "polite" : "none"}
@@ -95,6 +104,9 @@ const styles = StyleSheet.create({
     fontFamily: fonts.semibold,
     fontSize: typography.callout.fontSize,
     lineHeight: typography.callout.lineHeight,
+  },
+  inputContainer: {
+    position: "relative",
   },
   input: {
     minHeight: layout.fieldHeight,
@@ -121,6 +133,14 @@ const styles = StyleSheet.create({
   },
   inputDisabled: {
     opacity: 0.5,
+  },
+  inputWithTrailingControl: {
+    paddingRight: 58,
+  },
+  trailingControl: {
+    position: "absolute",
+    top: 6,
+    right: 6,
   },
   supportingText: {
     minHeight: typography.caption.lineHeight,

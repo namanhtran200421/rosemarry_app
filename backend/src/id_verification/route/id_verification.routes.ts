@@ -10,6 +10,7 @@ import {
     toVerificationStatus,
     verificationRepo,
 } from "../repository/id_verification.repo.js";
+import { requireApplicationUser, validateAccessToken } from "../../middleware/auth.middleware.js";
 
 /**
  * Returns the internal Rosemarry user ID populated by
@@ -155,7 +156,12 @@ const handleWebhook: RequestHandler = async function (req, res) {
  
 const router = Router();
  
-router.post("/start", startVerification);
+router.post(
+  "/start",
+  validateAccessToken,
+  requireApplicationUser,
+  startVerification,
+);
  
 // json() is listed explicitly so this works whether or not app.ts applies it
 // globally. X-Signature-V2 signs canonical json rather than raw bytes, so
