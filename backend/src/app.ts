@@ -8,7 +8,6 @@ import {
   validateAccessToken,
 } from "./middleware/auth.middleware";
 import authRouter from "./authentication/route/auth.route";
-import idVerificationRouter from "./id_verification/route/id_verification.routes.js";
 
 
 const app = express();
@@ -56,27 +55,15 @@ app.get("/health", async function (_req: Request, res: Response) {
   }
 });
 
-/*
- * The session route validates its Auth0 token internally because it needs to
- * create the application user on first login.
- */
-app.use("/api/v1/auth", authRouter);
 
-app.use("/verification", verificationRouter);
+app.use("/api/v1/auth", authRouter);
+app.use("/api/v1/id-verification",validateAccessToken,requireApplicationUser,verificationRouter);
+
+
 app.use(notFound)
 app.use(errorHandler)
-/*
- * Product endpoints use two authentication layers:
- *
- * 1. Validate the Auth0 access token.
- * 2. Resolve the token subject to an active internal Rosemarry user.
- */
-app.use(
-  "/api/v1/id-verification",
-  validateAccessToken,
-  requireApplicationUser,
-  idVerificationRouter,
-);
+
+
 
 /*
  * These must remain last:
