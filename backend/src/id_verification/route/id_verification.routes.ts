@@ -107,7 +107,6 @@ const handleWebhook: RequestHandler = async function (req, res) {
         return;
     }
 
-   if (typeof event.event_id !== "string" || event.event_id.legnth === 0 || typeof event.session_id !== "string" || event.session_id.legnth === 0)}
 
  
     // v3 deliveries carry no event id, so the idempotency key is derived. a
@@ -117,12 +116,12 @@ const handleWebhook: RequestHandler = async function (req, res) {
     // headers and is generated per http request, so a retry would get a fresh
     // one and be processed as new
 
-   // steve fix: use event_id for no duplicate flag
-    const eventId = event.event_id;
+   
+    const eventKey = `${event.session_id}:${event.status}`;
  
     try {
         const result = await verificationRepo.applyWebhookStatus(
-            eventId,
+            eventKey,
             event.session_id,
             toVerificationStatus(event.status),
         );
@@ -130,7 +129,7 @@ const handleWebhook: RequestHandler = async function (req, res) {
         console.log({
             scope: "didit",
             action: "webhookProcessed",
-            eventId,
+            eventKey,
             sessionId: event.session_id,
             status: event.status,
             result,
