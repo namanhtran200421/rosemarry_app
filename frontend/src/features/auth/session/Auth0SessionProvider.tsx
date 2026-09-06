@@ -38,7 +38,6 @@ export function Auth0SessionProvider({ children }: PropsWithChildren) {
     authorize,
     authorizeWithSMS,
     clearCredentials,
-    clearSession,
     createUser,
     getCredentials,
     isLoading: isAuth0Loading,
@@ -215,6 +214,11 @@ export function Auth0SessionProvider({ children }: PropsWithChildren) {
           audience: authConfig.audience,
           scope: AUTH0_TOKEN_SCOPE,
           connection: GOOGLE_CONNECTION,
+          // The Auth0 browser cookie may remain after a local-only logout.
+          // Always show Google's chooser so another person can use the device.
+          additionalParameters: {
+            prompt: "select_account",
+          },
         },
         {
           // This must match the custom scheme in app.config.ts.
@@ -272,14 +276,12 @@ export function Auth0SessionProvider({ children }: PropsWithChildren) {
     setStatus("logging-out");
 
     try {
-      // Clear both the device credentials and Auth0's browser session.
-      await clearSession(
-        {},
-        {
-          customScheme: AUTH0_CUSTOM_SCHEME,
-        },
-      );
+      // Clear tokens stored on this device without opening an Auth0 browser.
+      // Auth0's browser SSO cookie remains, so Google login uses an account
+      // chooser above instead of silently reusing the previous account.
+      await clearCredentials();
       setSession(null);
+      setStartupError(null);
       setStatus("unauthenticated");
     } catch (error) {
       setStatus("authenticated");
@@ -287,7 +289,7 @@ export function Auth0SessionProvider({ children }: PropsWithChildren) {
     } finally {
       operationRunning.current = false;
     }
-  }, [clearSession]);
+  }, [clearCredentials]);
 
   const value = useMemo<AuthSessionContextValue>(
     () => ({
