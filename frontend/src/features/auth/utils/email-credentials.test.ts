@@ -38,8 +38,18 @@ describe("email credential validation", () => {
         confirmPassword: "different",
       }),
     ).toEqual({
-      password: "Use at least 8 characters for your password.",
+      password: "Use at least 15 characters for your password.",
       confirmPassword: "The passwords do not match. Try again.",
     });
+  });
+
+  it("accepts a matching password that meets the Auth0 minimum", () => {
+    expect(
+      validateEmailCredentials("create", {
+        email: "person@example.com",
+        password: "fifteen-letters!",
+        confirmPassword: "fifteen-letters!",
+      }),
+    ).toEqual({});
   });
 });

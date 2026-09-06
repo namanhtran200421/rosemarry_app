@@ -12,7 +12,9 @@ interface EmailCredentialValues {
   confirmPassword: string;
 }
 
-const MINIMUM_PASSWORD_LENGTH = 8;
+export const MINIMUM_PASSWORD_LENGTH = 15;
+export const PASSWORD_REQUIREMENT_MESSAGE =
+  "Use at least 15 characters for your password.";
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 /** Removes accidental outer spaces without changing the email address. */
@@ -46,7 +48,7 @@ export function validateEmailCredentials(
     mode === "create" &&
     values.password.length < MINIMUM_PASSWORD_LENGTH
   ) {
-    errors.password = "Use at least 8 characters for your password.";
+    errors.password = PASSWORD_REQUIREMENT_MESSAGE;
   }
 
   if (mode === "create") {

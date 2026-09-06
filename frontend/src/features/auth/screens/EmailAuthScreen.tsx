@@ -10,11 +10,15 @@ import { Screen } from "../../../shared/ui/Screen";
 import { SegmentedControl } from "../../../shared/ui/SegmentedControl";
 import { AuthHeader } from "../components/AuthHeader";
 import { useAuthSession } from "../session/AuthSessionContext";
-import { getAuthenticationErrorMessage } from "../utils/auth-error-message";
+import {
+  getAccountCreationFieldError,
+  getAuthenticationErrorMessage,
+} from "../utils/auth-error-message";
 import {
   type EmailAuthMode,
   type EmailCredentialErrors,
   normalizeEmail,
+  PASSWORD_REQUIREMENT_MESSAGE,
   validateEmailCredentials,
 } from "../utils/email-credentials";
 
@@ -112,7 +116,27 @@ export function EmailAuthScreen({ initialMode, onBack }: EmailAuthScreenProps) {
       // Keep the email for correction, but clear sensitive password values.
       setPassword("");
       setConfirmPassword("");
-      passwordInputRef.current?.focus();
+
+      const accountFieldError = isCreating
+        ? getAccountCreationFieldError(error)
+        : null;
+
+      if (accountFieldError) {
+        setFieldErrors((currentErrors) => ({
+          ...currentErrors,
+          [accountFieldError.field]: accountFieldError.message,
+        }));
+        setRequestError(null);
+
+        if (accountFieldError.field === "email") {
+          emailInputRef.current?.focus();
+        } else {
+          passwordInputRef.current?.focus();
+        }
+
+        return;
+      }
+
       setRequestError(
         getAuthenticationErrorMessage(
           isCreating ? "create-account" : "sign-in",
@@ -147,6 +171,10 @@ export function EmailAuthScreen({ initialMode, onBack }: EmailAuthScreenProps) {
           disabled={isBusy}
         />
 
+        {displayedError !== null ? (
+          <ErrorMessage message={displayedError} />
+        ) : null}
+
         <AppTextInput
           ref={emailInputRef}
           label="Email"
@@ -173,7 +201,7 @@ export function EmailAuthScreen({ initialMode, onBack }: EmailAuthScreenProps) {
           value={password}
           errorText={fieldErrors.password}
           helperText={
-            isCreating ? "Use at least 8 characters." : "Enter your password."
+            isCreating ? PASSWORD_REQUIREMENT_MESSAGE : "Enter your password."
           }
           placeholder="Enter your password"
           textContentType={isCreating ? "newPassword" : "password"}
@@ -232,10 +260,6 @@ export function EmailAuthScreen({ initialMode, onBack }: EmailAuthScreenProps) {
             void handleSubmit();
           }}
         />
-
-        {displayedError !== null ? (
-          <ErrorMessage message={displayedError} />
-        ) : null}
       </View>
     </Screen>
   );

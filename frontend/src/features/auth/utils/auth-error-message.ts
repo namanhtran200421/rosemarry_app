@@ -1,4 +1,5 @@
 import { ApplicationSessionError } from "../api/auth-api";
+import { PASSWORD_REQUIREMENT_MESSAGE } from "./email-credentials";
 
 type AuthenticationAction =
   | "create-account"
@@ -33,6 +34,56 @@ export class AccountCreatedSignInError extends Error {
     super("The account was created, but sign-in did not complete.");
     this.name = "AccountCreatedSignInError";
   }
+}
+
+interface AccountCreationFieldError {
+  field: "email" | "password";
+  message: string;
+}
+
+/**
+ * Converts known Auth0 sign-up failures into a correction beside the field.
+ * Unknown provider details stay hidden and use the safe form-level message.
+ *
+ * @param error - Unknown value returned by the Auth0 SDK during sign-up.
+ * @returns A safe field error when the provider failure is recognised.
+ */
+export function getAccountCreationFieldError(
+  error: unknown,
+): AccountCreationFieldError | null {
+  if (typeof error !== "object" || error === null) {
+    return null;
+  }
+
+  const authError = error as Record<string, unknown>;
+  const providerDetails = [authError.code, authError.name, authError.message]
+    .filter((value): value is string => typeof value === "string")
+    .join(" ")
+    .toLowerCase();
+
+  if (
+    providerDetails.includes("invalid_password") ||
+    providerDetails.includes("passwordstrengtherror") ||
+    providerDetails.includes("password is too weak")
+  ) {
+    return {
+      field: "password",
+      message: PASSWORD_REQUIREMENT_MESSAGE,
+    };
+  }
+
+  if (
+    providerDetails.includes("user_exists") ||
+    providerDetails.includes("username_exists") ||
+    providerDetails.includes("user already exists")
+  ) {
+    return {
+      field: "email",
+      message: "An account already uses this email. Switch to Log in.",
+    };
+  }
+
+  return null;
 }
 
 /** Keeps provider and network details out of user-facing authentication errors. */

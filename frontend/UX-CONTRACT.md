@@ -28,6 +28,9 @@ Do not create one-off replacements for these patterns inside a screen.
   account creation adds password confirmation and signs in after creation.
 - Password values stay in transient form memory only. They are cleared after a
   failed request and are never logged or stored by the Rosemarry client.
+- Account passwords require at least 15 characters, matching the Auth0 database
+  connection. Known sign-up corrections appear beside the affected field;
+  other request failures appear above the fields so they remain visible.
 - Every pushed auth and onboarding screen exposes a back action. Back from the
   first onboarding step signs out and returns to the signed-out flow.
 - Onboarding branches are stored in navigation history, so Back returns to the
