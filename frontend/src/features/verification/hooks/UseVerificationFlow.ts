@@ -36,15 +36,15 @@ export interface VerificationFlow {
 }
  
 /**
- * Drives one pass through age verification.
+ * Drives one pass through age verification
  *
- * The hosted flow runs in an auth session browser rather than a WebView,
+ * The hosted flow runs in an auth session browser
  * because camera access is unreliable in a WebView and this flow is entirely
- * camera-based.
+ * camera based.
  *
- * Polling is the source of truth, not the redirect. The browser resolves
- * either way — success if the deep link fires, dismiss if the user simply
- * closes it — and the outcome reaches the backend by webhook regardless. That
+ * 
+ * The browser resolves if the deep link fires, dismiss if the user simply
+ * closes it and the outcome reaches the backend by webhook regardless. That
  * means a misconfigured scheme degrades to a slightly slower return rather
  * than a broken flow.
  */
@@ -70,7 +70,7 @@ export function useVerificationFlow(): VerificationFlow {
    * Maps a backend status onto a phase.
    *
    * PENDING is the only one that warrants waiting. IN_REVIEW is settled as far
-   * as this screen is concerned — a human is involved and that takes hours, so
+   * as this screen is concerned. A human is involved and that takes hours, so
    * polling it would spin indefinitely.
    */
   const applyStatus = useCallback((next: VerificationStatus | null) => {
@@ -116,7 +116,7 @@ export function useVerificationFlow(): VerificationFlow {
   /**
    * Polls until the status settles or the timeout expires.
    *
-   * Timing out is not a failure — the verification is still running and the
+   * Timing out is not a failure, the verification is still running and the
    * webhook will land eventually. It only means this screen should stop
    * implying a result is seconds away.
    */
