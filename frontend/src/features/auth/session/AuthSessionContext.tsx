@@ -11,6 +11,8 @@ export interface AuthSessionContextValue {
   verifySmsCode: (phoneNumber: string, code: string) => Promise<void>;
   /** Opens Auth0 and signs the user in with Google. */
   signInWithGoogle: () => Promise<void>;
+    /** Returns a currently valid Auth0 access token, refreshing if needed. */
+  getAccessToken: () => Promise<string>;
   /** Signs in with credentials entered on Rosemarry's email login screen. */
   signInWithEmailPassword: (email: string, password: string) => Promise<void>;
   /** Creates an Auth0 database account, then starts its Rosemarry session. */

@@ -24,7 +24,53 @@ import { requireApplicationUser, validateAccessToken } from "../../middleware/au
 function readUserId(req: Request): number | undefined {
   return req.user?.id;
 }
+
+/**
+ * reports the caller's verification state
+ *
+ * polled by the app after the user returns from Didit, since the webhook
+ * usually lands after the redirect. this is the only trustworthy source of
+ * status on the client — the callback url carries a status query parameter,
+ * but the user controls that url and it must not be believed
+ *
+ * @param req - incoming request, carrying the authenticated user
+ * @param res - the http response
+ * @param next - passes failures to errorHandler
+ */
+const getVerificationStatus: RequestHandler = async function (req, res, next) {
+    const userId = readUserId(req);
  
+    if (userId === undefined) {
+        next(
+            new AppError({
+                statusCode: 401,
+                code: "UNAUTHENTICATED",
+                message: "You must be signed in to check verification status",
+            }),
+        );
+ 
+        return;
+    }
+ 
+    try {
+        const [latest, ageVerified] = await Promise.all([
+            verificationRepo.findLatestByUserId(userId),
+            verificationRepo.isUserVerified(userId),
+        ]);
+ 
+        res.json({
+            ageVerified,
+            status: latest?.status ?? null,
+        });
+ 
+        return;
+    } catch (error) {
+        next(error);
+ 
+        return;
+    }
+};
+
 /**
  * Creates a Didit session and returns the hosted URL for the client.
  * Uses User ID to verify that the requester is authenticated.
@@ -155,6 +201,13 @@ const handleWebhook: RequestHandler = async function (req, res) {
 };
  
 const router = Router();
+
+router.get(
+    "/status",
+    validateAccessToken,
+    requireApplicationUser,
+    getVerificationStatus,
+);
  
 router.post(
   "/start",

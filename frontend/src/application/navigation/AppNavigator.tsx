@@ -1,6 +1,7 @@
 import { NavigationContainer } from "@react-navigation/native";
 
 import { useAuthSession } from "../../features/auth/session/AuthSessionContext";
+import { VerificationGate } from "../../features/verification/components/VerificationGate";
 import { LoadingScreen } from "../../shared/ui/LoadingScreen";
 
 import { AuthenticatedNavigator } from "./AuthenticatedNavigator";
@@ -18,7 +19,13 @@ export function AppNavigator() {
 
   return (
     <NavigationContainer>
-      {isAuthenticated ? <AuthenticatedNavigator /> : <AuthNavigator />}
+      {isAuthenticated ? (
+        <VerificationGate>
+          <AuthenticatedNavigator />
+        </VerificationGate>
+      ) : (
+        <AuthNavigator />
+      )}
     </NavigationContainer>
   );
 }

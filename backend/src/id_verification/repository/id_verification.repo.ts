@@ -171,10 +171,12 @@ export const verificationRepo: VerificationRepo = {
             `insert into id_verifications
                 (user_id, verification_type, provider, provider_reference, status)
              values ($1, null, $2, $3, 'PENDING')
+             on conflict (provider, provider_reference) do update
+                 set updated_at = now()
              returning ${RETURNED_COLUMNS}`,
             [userId, PROVIDER, sessionId],
         );
- 
+
         return toRecord(expectOne(rows, "insert into id_verifications"));
     },
  

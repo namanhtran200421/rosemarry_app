@@ -94,6 +94,21 @@ export function Auth0SessionProvider({ children }: PropsWithChildren) {
       isCurrent = false;
     };
   }, [getCredentials, isAuth0Loading, user]);
+  
+/** 
+ * Returns a currently valid Auth0 access token.
+ *
+ * getCredentials refreshes expired tokens on its own, so callers don't need to track expiry
+ */
+const getAccessToken = useCallback(async (): Promise<string> => {
+  const credentials = await getCredentials();
+
+  if (!credentials?.accessToken) {
+    throw new ApplicationSessionError(null);
+  }
+
+  return credentials.accessToken;
+}, [getCredentials]);
 
   const requestSmsCode = useCallback(
     async (phoneNumber: string): Promise<void> => {
@@ -296,6 +311,7 @@ export function Auth0SessionProvider({ children }: PropsWithChildren) {
       status,
       session,
       startupError,
+      getAccessToken,
       requestSmsCode,
       verifySmsCode,
       signInWithGoogle,
@@ -305,6 +321,7 @@ export function Auth0SessionProvider({ children }: PropsWithChildren) {
     }),
     [
       createAccountWithEmailPassword,
+      getAccessToken,
       logout,
       requestSmsCode,
       session,

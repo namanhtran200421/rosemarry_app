@@ -7,7 +7,7 @@ import {
     verificationRepo,
 } from "../id_verification/repository/id_verification.repo.js";
 
-const TEST_USER_ID = 2;
+const TEST_USER_ID = 11;
  
 async function main(): Promise<void> {
     console.log("creating session for user", TEST_USER_ID);
