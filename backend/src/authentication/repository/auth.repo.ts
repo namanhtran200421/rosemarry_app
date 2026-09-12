@@ -16,7 +16,7 @@ interface UserRow {
   auth_provider_user_id: string;
   account_status: AccountStatus;
   user_role: UserRole;
-  profile_exists: boolean;
+  onboard_completed_at: Date | null;
 }
 
 /**
@@ -31,7 +31,7 @@ function toApplicationUser(row: UserRow): ApplicationUser {
     authProviderUserId: row.auth_provider_user_id,
     accountStatus: row.account_status,
     role: row.user_role,
-    profileExists: row.profile_exists,
+    onboardCompletedAt: row.onboard_completed_at,
   };
 }
 
@@ -54,12 +54,10 @@ async function findByProviderUserId(
         users.auth_provider_user_id,
         users.account_status,
         users.user_role,
-        exists (
-          select 1
-          from profiles
-          where profiles.user_id = users.user_id
-        ) as profile_exists
+        profiles.onboard_completed_at
       from users
+      left outer join profiles
+      on profiles.user_id = users.user_id
       where users.auth_provider_user_id = $1
       limit 1
     `,

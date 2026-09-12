@@ -53,7 +53,7 @@ export async function createApplicationSession(
   return {
     userId: user.userId,
     role: user.role,
-    profileExists: user.profileExists,
+    onboardingCompleted: user.onboardCompletedAt !== null,
   };
 }
 

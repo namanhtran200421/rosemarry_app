@@ -32,7 +32,7 @@ export interface ApplicationUser {
   accountStatus: AccountStatus;
 
   /** Tells the frontend whether the user still needs onboarding. */
-  profileExists: boolean;
+  onboardCompletedAt: Date| null;
 }
 
 /**
@@ -49,5 +49,5 @@ export interface ApplicationSession {
   role: UserRole;
 
   /** Whether the user already has a completed profile record. */
-  profileExists: boolean;
+  onboardingCompleted: boolean;
 }

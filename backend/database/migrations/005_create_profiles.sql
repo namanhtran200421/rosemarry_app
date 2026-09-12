@@ -17,7 +17,7 @@ create table profiles(
     updated_at timestamptz not null default now(),
     created_at timestamptz not null default now(),
     height_cm smallint, 
-    onboard_completed_at timestamptz not null, 
+    onboard_completed_at timestamptz, 
     onboarding_stage varchar(50) not null,
 
     constraint pk_profiles primary key (user_id),
