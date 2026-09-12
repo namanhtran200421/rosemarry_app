@@ -4,8 +4,9 @@ import type { ApplicationUser } from "../types/auth.types.js";
 /**
  * Finds a user by their verified Auth0 user ID.
  *
- * The profile is left joined because a newly authenticated user may not have
- * started onboarding yet and therefore may not have a profile row.
+ * The profile join exposes the onboarding completion timestamp when one has
+ * been recorded. The profile is left joined because a newly authenticated user
+ * may not have started onboarding; missing and unfinished profiles return null.
  *
  * @param providerUserId - The verified `sub` value from an Auth0 access token.
  * @returns The matching user, or `null` when the user has not signed in before.
@@ -20,8 +21,10 @@ async function findByProviderUserId(
       "users.userId",
       "users.authProviderUserId",
       "users.accountStatus",
+      // ApplicationUser calls this `role`, and that name reaches the client in
+      // the session response, so the column is aliased rather than renamed.
       "users.userRole as role",
-      "profiles.onboardCompletedAt",
+      "profiles.onboardCompletedAt as onboardCompletedAt",
     ])
     .where("users.authProviderUserId", "=", providerUserId)
     .limit(1)
@@ -46,12 +49,8 @@ async function findOrCreateByProviderUserId(
 ): Promise<ApplicationUser> {
   await db
     .insertInto("users")
-    .values({
-      authProviderUserId: providerUserId,
-    })
-    .onConflict((oc:any) =>
-      oc.column("authProviderUserId").doNothing(),
-    )
+    .values({ authProviderUserId: providerUserId })
+    .onConflict((oc) => oc.column("authProviderUserId").doNothing())
     .execute();
 
   const user = await findByProviderUserId(providerUserId);
