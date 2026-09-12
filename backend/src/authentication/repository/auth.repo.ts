@@ -29,7 +29,6 @@ async function findByProviderUserId(
     .where("users.authProviderUserId", "=", providerUserId)
     .limit(1)
     .executeTakeFirst();
-
   return user ?? null;
 }
 

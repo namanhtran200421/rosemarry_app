@@ -32,7 +32,7 @@ export interface ApplicationUser {
   accountStatus: AccountStatus;
 
   /** Tells the frontend whether the user still needs onboarding. */
-  onboardCompletedAt: Date| null;
+  onboardCompletedAt: Date | null;
 }
 
 /**
