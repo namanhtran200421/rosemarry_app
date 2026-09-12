@@ -1,39 +1,5 @@
-import pool from "../../config/database.js";
-import type {
-  AccountStatus,
-  ApplicationUser,
-  UserRole,
-} from "../types/auth.types.js";
-
-/**
- * Describes one user row returned by Postgres.
- *
- * Database columns use snake_case. The rest of the backend uses camelCase, so
- * this private type keeps the database format inside the repository layer.
- */
-interface UserRow {
-  user_id: number;
-  auth_provider_user_id: string;
-  account_status: AccountStatus;
-  user_role: UserRole;
-  profile_exists: boolean;
-}
-
-/**
- * Converts a database user row into the format used by backend services.
- *
- * @param row - User data returned by Postgres.
- * @returns The same user data with camelCase property names.
- */
-function toApplicationUser(row: UserRow): ApplicationUser {
-  return {
-    userId: row.user_id,
-    authProviderUserId: row.auth_provider_user_id,
-    accountStatus: row.account_status,
-    role: row.user_role,
-    profileExists: row.profile_exists,
-  };
-}
+import { db } from "../../config/database.js";
+import type { ApplicationUser } from "../types/auth.types.js";
 
 /**
  * Finds a user by their verified Auth0 user ID.
@@ -47,28 +13,32 @@ function toApplicationUser(row: UserRow): ApplicationUser {
 async function findByProviderUserId(
   providerUserId: string,
 ): Promise<ApplicationUser | null> {
-  const { rows } = await pool.query<UserRow>(
-    `
-      select
-        users.user_id,
-        users.auth_provider_user_id,
-        users.account_status,
-        users.user_role,
-        exists (
-          select 1
-          from profiles
-          where profiles.user_id = users.user_id
-        ) as profile_exists
-      from users
-      where users.auth_provider_user_id = $1
-      limit 1
-    `,
-    [providerUserId],
-  );
+  const user = await db
+    .selectFrom("users")
+    .select((eb) => [
+      "userId",
+      "authProviderUserId",
+      "accountStatus",
 
-  const row = rows[0];
+      // ApplicationUser calls this `role`, and that name reaches the client in
+      // the session response, so the column is aliased rather than renamed.
+      "userRole as role",
 
-  return row ? toApplicationUser(row) : null;
+      eb
+        .exists(
+          eb
+            .selectFrom("profiles")
+            .select("userId")
+            .whereRef("profiles.userId", "=", "users.userId"),
+        )
+        .$castTo<boolean>()
+        .as("profileExists"),
+    ])
+    .where("authProviderUserId", "=", providerUserId)
+    .limit(1)
+    .executeTakeFirst();
+
+  return user ?? null;
 }
 
 /**
@@ -85,14 +55,11 @@ async function findByProviderUserId(
 async function findOrCreateByProviderUserId(
   providerUserId: string,
 ): Promise<ApplicationUser> {
-  await pool.query(
-    `
-      insert into users (auth_provider_user_id)
-      values ($1)
-      on conflict (auth_provider_user_id) do nothing
-    `,
-    [providerUserId],
-  );
+  await db
+    .insertInto("users")
+    .values({ authProviderUserId: providerUserId })
+    .onConflict((oc) => oc.column("authProviderUserId").doNothing())
+    .execute();
 
   // Read the row after the insert so this also works when another request
   // created the user at the same time.

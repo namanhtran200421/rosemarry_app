@@ -1,5 +1,5 @@
-import pool from "../../config/database.js";
-import type { VerificationStatus, VerificationType } from "../types/verification_types.js";
+import pool, { db } from "../../config/database.js";
+import type { VerificationStatus } from "../types/verification_types.js";
 import type { DiditStatus } from "../service/id_verification.service.js";
 import type { VerificationRecord } from "../types/verification_types.js";
  
@@ -41,71 +41,6 @@ const STATUS_MAP: Record<DiditStatus, VerificationStatus> = {
  */
 export function toVerificationStatus(status: DiditStatus): VerificationStatus {
     return STATUS_MAP[status];
-}
- 
-/** matches postgres rows */
-interface VerificationRow {
-    verification_id: number;
-    user_id: number;
-    verification_type: VerificationType | null;
-    provider: string;
-    provider_reference: string | null;
-    status: VerificationStatus;
-    verified_at: Date | null;
-    expires_at: Date | null;
-    created_at: Date;
-    updated_at: Date;
-}
- 
-const RETURNED_COLUMNS = `
-    verification_id,
-    user_id,
-    verification_type,
-    provider,
-    provider_reference,
-    status,
-    verified_at,
-    expires_at,
-    created_at,
-    updated_at
-`;
- 
-/**
- * Helper function that converts a database row to camelCase for convenience
- *
- * @param row - a row from id_verifications
- * @returns the mapped record
- */
-function toRecord(row: VerificationRow): VerificationRecord {
-    return {
-        verificationId: row.verification_id,
-        userId: row.user_id,
-        verificationType: row.verification_type,
-        provider: row.provider,
-        providerReference: row.provider_reference,
-        status: row.status,
-        verifiedAt: row.verified_at,
-        expiresAt: row.expires_at,
-        createdAt: row.created_at,
-        updatedAt: row.updated_at,
-    };
-}
- 
-/**
- * Helper function that asserts a query returned at least one row
- *
- * @param rows - result rows from a query expected to return one
- * @param context - what was being queried (for the error message)
- * @returns the first row
- */
-function expectOne<T>(rows: T[], context: string): T {
-    const row = rows[0];
- 
-    if (!row) {
-        throw new Error(`expected one row from ${context}, got none`);
-    }
- 
-    return row;
 }
  
 export interface VerificationRepo {
@@ -167,46 +102,48 @@ export interface VerificationRepo {
  
 export const verificationRepo: VerificationRepo = {
     async createPending(userId, sessionId) {
-        const { rows } = await pool.query<VerificationRow>(
-            `insert into id_verifications
-                (user_id, verification_type, provider, provider_reference, status)
-             values ($1, null, $2, $3, 'PENDING')
-             returning ${RETURNED_COLUMNS}`,
-            [userId, PROVIDER, sessionId],
-        );
- 
-        return toRecord(expectOne(rows, "insert into id_verifications"));
+        return db
+            .insertInto("idVerifications")
+            .values({
+                userId,
+                verificationType: null,
+                provider: PROVIDER,
+                providerReference: sessionId,
+                status: "PENDING",
+            })
+            .returningAll()
+            .executeTakeFirstOrThrow(
+                () => new Error("expected one row from insert into id_verifications, got none"),
+            );
     },
- 
+
     async findLatestByUserId(userId) {
-        const { rows } = await pool.query<VerificationRow>(
-            `select ${RETURNED_COLUMNS}
-             from id_verifications
-             where user_id = $1
-             order by created_at desc
-             limit 1`,
-            [userId],
-        );
- 
-        const row = rows[0];
- 
-        return row ? toRecord(row) : null;
+        const record = await db
+            .selectFrom("idVerifications")
+            .selectAll()
+            .where("userId", "=", userId)
+            .orderBy("createdAt", "desc")
+            .limit(1)
+            .executeTakeFirst();
+
+        return record ?? null;
     },
- 
+
     async isUserVerified(userId) {
-        const { rows } = await pool.query<{ verified: boolean }>(
-            `select exists (
-                select 1
-                from id_verifications
-                where user_id = $1
-                  and status = 'APPROVED'
-             ) as verified`,
-            [userId],
-        );
- 
-        return rows[0]?.verified ?? false;
+        const approved = await db
+            .selectFrom("idVerifications")
+            .select("verificationId")
+            .where("userId", "=", userId)
+            .where("status", "=", "APPROVED")
+            .limit(1)
+            .executeTakeFirst();
+
+        return approved !== undefined;
     },
- 
+
+    // Left on the raw pool deliberately. This is the webhook idempotency path,
+    // and its enum casts and conditional verified_at would become sql`` escape
+    // hatches under the query builder, buying churn rather than safety.
     async applyWebhookStatus(eventId, sessionId, status) {
         const client = await pool.connect();
  
