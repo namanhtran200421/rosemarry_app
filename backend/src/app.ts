@@ -40,11 +40,8 @@ app.get("/health", async function (_req: Request, res: Response) {
 });
 
 app.use("/api/v1/auth", authRouter);
-
-// Authentication is applied to individual user-facing routes inside this router.
 app.use("/api/v1/id-verification", verificationRouter);
 
-// These must appear exactly once and remain last.
 app.use(notFound);
 app.use(errorHandler);
 
