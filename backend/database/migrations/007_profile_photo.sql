@@ -1,10 +1,10 @@
 --migrate:up
 create table profile_photos (
-    user_id integer generated always as identity, 
-media_id integer generated always as identity, 
-photo_order int not null, 
-is_primary boolean not null,
-updated_at timestamptz not null,
+    user_id integer,
+    media_id integer,
+    photo_order int not null, 
+    is_primary boolean not null,
+    updated_at timestamptz not null,
 
 constraint pk_profile_photo primary key(user_id, media_id),
 
