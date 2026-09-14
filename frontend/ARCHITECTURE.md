@@ -95,7 +95,8 @@ Authentication concerns are intentionally separated:
 
 Navigation is split similarly: `AppNavigator` owns the session boundary,
 `AuthNavigator` owns the signed-out flow, and `AuthenticatedNavigator` owns the
-onboarding/home flow.
+onboarding/main-app transition. `MainAppNavigator` composes the raw Discover,
+Likes, Circle, Chat, and Me features over the in-memory `SocialProvider`.
 
 Authenticated navigation is wrapped by `VerificationGate`. It obtains a fresh
 access token through the session contract, launches Didit's hosted camera flow,

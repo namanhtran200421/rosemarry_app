@@ -40,7 +40,7 @@ Do not create one-off replacements for these patterns inside a screen.
   service failures each keep a visible recovery action and confirmed logout.
 - Onboarding branches are stored in navigation history, so Back returns to the
   actual previous answer rather than a guessed linear step.
-- Completion enters Home. Logout asks for confirmation, then returns to Welcome
+- Completion enters the Circle tab in the main five-tab app. Logout asks for confirmation, then returns to Welcome
   only after the user confirms and credential clearing succeeds. A failed logout
   keeps the dialog open with a retry path.
 
