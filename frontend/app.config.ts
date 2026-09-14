@@ -21,6 +21,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   ...config,
   name: "Rosemarry",
   slug: "rosemarry",
+  scheme: "rosemarry",
   version: "1.0.0",
   orientation: "portrait",
   userInterfaceStyle: "light",

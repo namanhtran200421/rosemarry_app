@@ -23,6 +23,7 @@ import {
   AuthSessionContextProvider,
   type AuthSessionContextValue,
 } from "./AuthSessionContext";
+import { markOnboardingCompleted } from "./auth-session-state";
 
 const AUTH0_LOGIN_SCOPE = "openid profile email phone offline_access";
 const AUTH0_TOKEN_SCOPE = "openid profile email offline_access";
@@ -94,6 +95,16 @@ export function Auth0SessionProvider({ children }: PropsWithChildren) {
       isCurrent = false;
     };
   }, [getCredentials, isAuth0Loading, user]);
+
+  const getAccessToken = useCallback(async (): Promise<string> => {
+    const credentials = await getCredentials();
+
+    if (!credentials?.accessToken) {
+      throw new ApplicationSessionError(null);
+    }
+
+    return credentials.accessToken;
+  }, [getCredentials]);
 
   const requestSmsCode = useCallback(
     async (phoneNumber: string): Promise<void> => {
@@ -270,6 +281,10 @@ export function Auth0SessionProvider({ children }: PropsWithChildren) {
     [createUser, finishCredentialSignIn, loginWithPasswordRealm],
   );
 
+  const completeOnboarding = useCallback((): void => {
+    setSession(markOnboardingCompleted);
+  }, []);
+
   const logout = useCallback(async (): Promise<void> => {
     assertNoOperationInProgress(operationRunning);
     operationRunning.current = true;
@@ -296,15 +311,19 @@ export function Auth0SessionProvider({ children }: PropsWithChildren) {
       status,
       session,
       startupError,
+      getAccessToken,
       requestSmsCode,
       verifySmsCode,
       signInWithGoogle,
       signInWithEmailPassword,
       createAccountWithEmailPassword,
+      completeOnboarding,
       logout,
     }),
     [
+      completeOnboarding,
       createAccountWithEmailPassword,
+      getAccessToken,
       logout,
       requestSmsCode,
       session,
