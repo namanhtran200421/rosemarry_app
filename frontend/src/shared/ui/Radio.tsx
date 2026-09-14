@@ -1,6 +1,8 @@
-import { StyleSheet, View } from "react-native";
+import { View } from "react-native";
 
-import { colors, radii } from "../theme/tokens";
+import { brut, radii } from "../theme/tokens";
+
+import { Icon } from "./Icon";
 
 interface RadioProps {
   checked?: boolean;
@@ -8,50 +10,27 @@ interface RadioProps {
 }
 
 /**
- * Selection indicator used by OptionRow — an empty ring that becomes a
- * filled pink disc with a white check. The check is drawn from borders
- * rather than an icon so the app stays free of an SVG dependency.
+ * Selection indicator used by rows — an outlined circle that fills green and
+ * carries an ink check when on.
  */
 export function Radio({ checked = false, size = 24 }: RadioProps) {
   return (
     <View
-      style={[
-        styles.ring,
-        {
-          width: size,
-          height: size,
-          backgroundColor: checked ? colors.primary : colors.surface,
-          borderColor: checked ? colors.primary : colors.borderStrong,
-          borderWidth: checked ? 1 : 1.5,
-        },
-      ]}
+      accessible={false}
+      accessibilityElementsHidden
+      importantForAccessibility="no-hide-descendants"
+      style={{
+        width: size,
+        height: size,
+        borderRadius: radii.pill,
+        borderWidth: brut.borderThin,
+        borderColor: brut.ink,
+        backgroundColor: checked ? brut.green : brut.white,
+        alignItems: "center",
+        justifyContent: "center",
+      }}
     >
-      {checked ? (
-        <View
-          style={[
-            styles.check,
-            {
-              width: size * 0.25,
-              height: size * 0.45,
-              marginTop: -size * 0.08,
-            },
-          ]}
-        />
-      ) : null}
+      {checked ? <Icon name="Check" size={Math.round(size * 0.6)} /> : null}
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  ring: {
-    alignItems: "center",
-    justifyContent: "center",
-    borderRadius: radii.pill,
-  },
-  check: {
-    borderColor: colors.onPrimary,
-    borderRightWidth: 2,
-    borderBottomWidth: 2,
-    transform: [{ rotate: "45deg" }],
-  },
-});

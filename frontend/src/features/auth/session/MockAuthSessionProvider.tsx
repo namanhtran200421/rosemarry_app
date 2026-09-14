@@ -10,7 +10,7 @@ import {
 const MOCK_SESSION: ApplicationSession = {
   userId: 1,
   role: "USER",
-  profileExists: false,
+  onboardingCompleted: false,
 };
 
 /** Local-only auth adapter that preserves the complete phone and OTP UI flow. */

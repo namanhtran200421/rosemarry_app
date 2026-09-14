@@ -6,15 +6,16 @@ in `ARCHITECTURE.md`.
 
 ## Canonical UI
 
-| Need                     | Component                    | Notes                                              |
-| ------------------------ | ---------------------------- | -------------------------------------------------- |
-| Page container           | `Screen`                     | Safe-area-aware warm canvas                        |
-| Primary/secondary action | `AppButton`                  | Includes disabled and busy states                  |
-| Text entry               | `AppTextInput`               | Label, hint, and error semantics                   |
-| Back navigation          | `BackButton`                 | Accessible icon action used by auth and onboarding |
-| Recoverable error        | `ErrorMessage`               | Inline, screen-local feedback                      |
-| Single choice            | `OptionRow` or `Radio`       | Use the existing selection language                |
-| Compact choice           | `Chip` or `SegmentedControl` | Use only when labels remain readable               |
+| Need                     | Component                    | Notes                                               |
+| ------------------------ | ---------------------------- | --------------------------------------------------- |
+| Page container           | `Screen`                     | Safe-area-aware warm canvas                         |
+| Primary/secondary action | `AppButton`                  | Includes disabled and busy states                   |
+| Text entry               | `AppTextInput`               | Label, hint, and error semantics                    |
+| Back navigation          | `BackButton`                 | Accessible icon action used by auth and onboarding  |
+| Recoverable error        | `ErrorMessage`               | Inline, screen-local feedback                       |
+| Confirmation dialog      | `CenterModal`                | Modal decision with explicit cancel/confirm actions |
+| Single choice            | `OptionRow` or `Radio`       | Use the existing selection language                 |
+| Compact choice           | `Chip` or `SegmentedControl` | Use only when labels remain readable                |
 
 Do not create one-off replacements for these patterns inside a screen.
 
@@ -35,7 +36,9 @@ Do not create one-off replacements for these patterns inside a screen.
   first onboarding step signs out and returns to the signed-out flow.
 - Onboarding branches are stored in navigation history, so Back returns to the
   actual previous answer rather than a guessed linear step.
-- Completion enters Home. Logout returns to Welcome.
+- Completion enters Home. Logout asks for confirmation, then returns to Welcome
+  only after the user confirms and credential clearing succeeds. A failed logout
+  keeps the dialog open with a retry path.
 
 ## Async and failure behavior
 

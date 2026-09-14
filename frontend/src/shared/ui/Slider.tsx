@@ -7,34 +7,37 @@ import {
   type LayoutChangeEvent,
 } from "react-native";
 
-import {
-  colors,
-  fonts,
-  radii,
-  shadows,
-  spacing,
-  typography,
-} from "../../../shared/theme/tokens";
+import { brut, colors, drop, fonts, radii } from "../theme/tokens";
+
+import { Tag } from "./Tag";
+
+const THUMB = 24;
 
 interface SliderProps {
-  label: string;
+  /** Visible label; omit when the surrounding field already names it. */
+  label?: string;
+  accessibilityLabel?: string;
   value: number;
   min: number;
   max: number;
-  unit?: string;
+  step?: number;
+  format?: (value: number) => string;
   onChange: (value: number) => void;
 }
 
 /**
- * Touch-draggable range control built on the view responder props, so the
- * onboarding flow adds no native module to the build.
+ * Touch-draggable value control built on the view responder props, so no
+ * native slider module is needed. An outlined track with a pink fill and a
+ * white thumb carrying a hard drop.
  */
 export function Slider({
   label,
+  accessibilityLabel,
   value,
   min,
   max,
-  unit = "",
+  step = 1,
+  format = String,
   onChange,
 }: SliderProps) {
   const [width, setWidth] = useState(0);
@@ -44,7 +47,7 @@ export function Slider({
       return;
     }
     const ratio = Math.max(0, Math.min(1, event.nativeEvent.locationX / width));
-    onChange(Math.round(min + ratio * (max - min)));
+    onChange(Math.round((min + ratio * (max - min)) / step) * step);
   }
 
   function handleLayout(event: LayoutChangeEvent): void {
@@ -53,22 +56,19 @@ export function Slider({
 
   const ratio =
     max === min ? 0 : Math.max(0, Math.min(1, (value - min) / (max - min)));
-  const filled = Math.round(ratio * width);
+  const filled = ratio * width;
 
   return (
     <View style={styles.container}>
-      <View style={styles.labelRow}>
-        <Text style={styles.label}>{label}</Text>
-        <Text style={styles.value}>
-          {value}
-          {unit}
-        </Text>
+      <View style={[styles.labelRow, !label && styles.labelRowEnd]}>
+        {label ? <Text style={styles.label}>{label}</Text> : null}
+        <Tag label={format(value)} color={brut.green} />
       </View>
 
       <View
         accessibilityRole="adjustable"
-        accessibilityLabel={label}
-        accessibilityValue={{ min, max, now: value }}
+        accessibilityLabel={accessibilityLabel ?? label}
+        accessibilityValue={{ min, max, now: value, text: format(value) }}
         accessibilityActions={[{ name: "increment" }, { name: "decrement" }]}
         onAccessibilityAction={(event) => {
           const { actionName } = event.nativeEvent;
@@ -77,27 +77,59 @@ export function Slider({
             return;
           }
 
-          const delta = actionName === "increment" ? 1 : -1;
+          const delta = actionName === "increment" ? step : -step;
           onChange(Math.max(min, Math.min(max, value + delta)));
         }}
         onLayout={handleLayout}
         onMoveShouldSetResponder={() => true}
         onResponderGrant={setFromEvent}
         onResponderMove={setFromEvent}
+        onResponderTerminationRequest={() => false}
         onStartShouldSetResponder={() => true}
         style={styles.hitArea}
       >
         <View pointerEvents="none" style={styles.track}>
-          <View style={[styles.fill, { width: filled }]} />
+          <View style={[styles.fill, { width: Math.max(0, filled - 4) }]} />
         </View>
         <View
           pointerEvents="none"
-          style={[styles.thumb, { left: Math.max(0, filled - 11) }]}
+          style={[styles.thumb, { left: filled - THUMB / 2 }]}
         />
       </View>
     </View>
   );
 }
+
+export const sliderStyles = StyleSheet.create({
+  track: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    height: 12,
+    borderRadius: radii.pill,
+    borderWidth: brut.borderThin,
+    borderColor: brut.ink,
+    backgroundColor: brut.white,
+    justifyContent: "center",
+  },
+  fill: {
+    position: "absolute",
+    left: 1,
+    height: 7,
+    borderRadius: radii.pill,
+    backgroundColor: colors.primary,
+  },
+  thumb: {
+    position: "absolute",
+    width: THUMB,
+    height: THUMB,
+    borderRadius: radii.pill,
+    borderWidth: brut.border,
+    borderColor: brut.ink,
+    backgroundColor: brut.white,
+    boxShadow: drop(2),
+  },
+});
 
 const styles = StyleSheet.create({
   container: {
@@ -106,42 +138,23 @@ const styles = StyleSheet.create({
   labelRow: {
     flexDirection: "row",
     justifyContent: "space-between",
-    alignItems: "baseline",
-    marginBottom: spacing.sm,
+    alignItems: "center",
+    marginBottom: 10,
+  },
+  labelRowEnd: {
+    justifyContent: "flex-end",
   },
   label: {
-    color: colors.text,
-    fontFamily: fonts.semibold,
-    fontSize: typography.callout.fontSize,
-  },
-  value: {
-    color: colors.primaryAccessible,
+    color: brut.ink,
     fontFamily: fonts.bold,
-    fontSize: typography.sub.fontSize,
+    fontSize: 15,
   },
   hitArea: {
     height: 32,
     justifyContent: "center",
+    marginHorizontal: THUMB / 2,
   },
-  track: {
-    height: 6,
-    borderRadius: radii.pill,
-    backgroundColor: colors.border,
-    overflow: "hidden",
-  },
-  fill: {
-    height: "100%",
-    backgroundColor: colors.primary,
-    borderRadius: radii.pill,
-  },
-  thumb: {
-    position: "absolute",
-    width: 22,
-    height: 22,
-    borderRadius: radii.pill,
-    backgroundColor: colors.surface,
-    borderWidth: 2,
-    borderColor: colors.primary,
-    ...shadows.sm,
-  },
+  track: sliderStyles.track,
+  fill: sliderStyles.fill,
+  thumb: sliderStyles.thumb,
 });

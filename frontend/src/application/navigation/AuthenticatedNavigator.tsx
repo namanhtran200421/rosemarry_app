@@ -17,7 +17,7 @@ export function AuthenticatedNavigator() {
   const { logout, session } = useAuthSession();
   const [hasFinishedOnboarding, setHasFinishedOnboarding] = useState(false);
   const needsOnboarding =
-    session !== null && !session.profileExists && !hasFinishedOnboarding;
+    session !== null && !session.onboardingCompleted && !hasFinishedOnboarding;
 
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>

@@ -1,6 +1,6 @@
 import { Pressable, StyleSheet, Text, View } from "react-native";
 
-import { colors, fonts, radii, typography } from "../theme/tokens";
+import { brut, colors, fonts, radii, typography } from "../theme/tokens";
 
 interface SegmentedOption {
   value: string;
@@ -16,7 +16,7 @@ interface SegmentedControlProps {
   disabled?: boolean;
 }
 
-/** Pill segmented control. White track, brand border, brand-filled segment. */
+/** Outlined pill track; the active segment fills brand pink. */
 export function SegmentedControl({
   options,
   value,
@@ -25,7 +25,7 @@ export function SegmentedControl({
   accessibilityLabel,
   disabled = false,
 }: SegmentedControlProps) {
-  const height = size === "sm" ? 38 : 46;
+  const height = size === "sm" ? 40 : 48;
   const fontSize =
     size === "sm" ? typography.caption.fontSize : typography.sub.fontSize;
 
@@ -45,22 +45,9 @@ export function SegmentedControl({
             accessibilityState={{ selected: isActive, disabled }}
             disabled={disabled}
             onPress={() => onChange(option.value)}
-            style={[
-              styles.segment,
-              isActive && { backgroundColor: colors.primary },
-            ]}
+            style={[styles.segment, isActive && styles.segmentActive]}
           >
-            <Text
-              style={[
-                styles.label,
-                {
-                  fontSize,
-                  color: isActive ? colors.onPrimary : colors.textSecondary,
-                },
-              ]}
-            >
-              {option.label}
-            </Text>
+            <Text style={[styles.label, { fontSize }]}>{option.label}</Text>
           </Pressable>
         );
       })}
@@ -73,24 +60,29 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignSelf: "flex-start",
     padding: 4,
-    gap: 4,
-    backgroundColor: colors.surface,
-    borderWidth: 1,
-    borderColor: colors.primary,
+    gap: 6,
+    backgroundColor: brut.white,
+    borderWidth: brut.border,
+    borderColor: brut.ink,
     borderRadius: radii.pill,
   },
   trackDisabled: {
     opacity: 0.45,
   },
   segment: {
-    flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
     paddingHorizontal: 18,
     height: "100%",
     borderRadius: radii.pill,
   },
+  segmentActive: {
+    backgroundColor: colors.primary,
+    borderWidth: brut.borderThin,
+    borderColor: brut.ink,
+  },
   label: {
-    fontFamily: fonts.semibold,
+    color: brut.ink,
+    fontFamily: fonts.bold,
   },
 });

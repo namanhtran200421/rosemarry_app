@@ -5,7 +5,7 @@ const SESSION_REQUEST_TIMEOUT_MS = 10_000;
 export interface ApplicationSession {
   userId: number;
   role: "USER" | "STAFF";
-  profileExists: boolean;
+  onboardingCompleted: boolean;
 }
 
 export class ApplicationSessionError extends Error {
@@ -79,6 +79,6 @@ function isApplicationSession(value: unknown): value is ApplicationSession {
     Number.isSafeInteger(userId) &&
     userId > 0 &&
     (session.role === "USER" || session.role === "STAFF") &&
-    typeof session.profileExists === "boolean"
+    typeof session.onboardingCompleted === "boolean"
   );
 }

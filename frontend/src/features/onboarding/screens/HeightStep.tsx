@@ -1,7 +1,7 @@
 import { AppButton } from "../../../shared/ui/AppButton";
+import { WheelPicker } from "../../../shared/ui/WheelPicker";
 import { OnboardingScreen } from "../components/OnboardingScreen";
 import { StepTitle } from "../components/StepTitle";
-import { WheelPicker } from "../components/WheelPicker";
 import { TOTAL_STEPS, type StepScreenProps } from "../types/onboarding.types";
 
 const HEIGHTS = (() => {

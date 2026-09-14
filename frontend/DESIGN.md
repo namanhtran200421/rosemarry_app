@@ -117,7 +117,10 @@ White text on `primary` measures **2.5:1**, below the WCAG AA 4.5:1 threshold
 for normal text. Primary controls therefore use `colors.onPrimary` mapped to
 `palette.ink`, providing **6.8:1** while preserving the brand-pink fill.
 `colors.primaryAccessible` (`#A4134A`) remains available when a deep-pink
-surface with white content is specifically required.
+surface with white content is specifically required, and is the text color for
+pink labels on the tint or the canvas (`secondary` and `ghost` buttons, soft
+pink badges), where `primary` reads only 2.2:1. Orange badges use ink text for
+the same reason.
 
 Danger surfaces already use `dangerStrong` (`#A8153A`) for text and borders,
 which reads 5.4:1 on `dangerSurface`.
@@ -143,7 +146,9 @@ consistent 56px tall; the minimum tap target is 44px.
 
 Soft, low, warm-tinted shadows — never a hard drop shadow. Cards use
 `shadows.md` (`0 6px 20px rgba(12,20,17,.08)`). Selection is expressed with a
-1.5px pink ring rather than elevation.
+1.5px pink ring rather than elevation, and focus with a 3px translucent pink
+halo. Both are spread-only `boxShadow` values in `rings`, drawn outside the
+border so they never shift layout.
 
 ## Shapes
 
@@ -156,8 +161,8 @@ has a sharp corner.
 ### Foundational visual states
 
 Every action has default, pressed, disabled, and busy states. Press feedback is
-a quiet scale-down (0.98, or 0.94 for compact controls) — no color flip, no
-ripple. Disabled drops to 45% opacity. Busy labels retain their geometry while
+a quiet scale-down (0.98 for buttons, 0.97 for chips, 0.94 for icon buttons) —
+no color flip, no ripple. Disabled drops to 45% opacity. Busy labels retain their geometry while
 a centered progress indicator appears. Errors are persistent inline messages
 with an assertive live-region announcement.
 
@@ -168,14 +173,23 @@ Two flavors, both driven by the brand pink:
 - **Fill** — the control turns solid pink with an ink label. Use for compact
   single-line choices: chips, the active segment, `OptionRow` with
   `selectedStyle="fill"`.
-- **Tint + ring + check** — pink-tinted background, 1.5px pink ring, and a
-  filled pink circle with an ink check. Use for rich rows carrying a subtitle.
+- **Tint + ring + check** — pink-tinted background, 1.5px pink ring outside
+  the hairline border, and a filled pink circle with an ink check. Use for rich
+  rows carrying a subtitle.
+
+### Buttons and fields
+
+`AppButton` intents: `primary` (solid pink), `secondary` (pink tint), `neutral`
+(white with a hairline), `ghost` (pink text only), and `danger`.
+`AppTextInput` has two skins: `outline` (white, hairline, soft shadow — the
+default) and `filled` (soft gray). `filled` is nearly invisible on the cream
+canvas (1.03:1), so reserve it for white surfaces.
 
 ### Shared primitives
 
-`shared/ui` holds `Screen`, `AppButton`, `AppTextInput`, `ErrorMessage`,
-`LoadingScreen`, `BrandMark`, `BackButton`, `Chip`, `IconButton`, `OptionRow`,
-`Radio`, and `SegmentedControl`. Feature screens compose these and must not
+`shared/ui` holds `Screen`, `AppButton`, `AppTextInput`, `Badge`,
+`ErrorMessage`, `LoadingScreen`, `BrandMark`, `BackButton`, `Chip`,
+`IconButton`, `OptionRow`, `Radio`, and `SegmentedControl`. Feature screens compose these and must not
 introduce new brand colors, radii, or loading behavior.
 
 ### Iconography
