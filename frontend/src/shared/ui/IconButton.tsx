@@ -1,9 +1,15 @@
 import type { ReactNode } from "react";
-import { Pressable, StyleSheet } from "react-native";
+import { Pressable } from "react-native";
 
-import { colors, layout, motion, radii, shadows } from "../theme/tokens";
+import {
+  brut,
+  drop,
+  layout,
+  motion,
+  radii,
+} from "../theme/tokens";
 
-type IconButtonVariant = "surface" | "tint" | "ghost";
+type IconButtonVariant = "surface" | "paper" | "yellow" | "ghost";
 
 interface IconButtonProps {
   accessibilityLabel: string;
@@ -12,13 +18,19 @@ interface IconButtonProps {
   variant?: IconButtonVariant;
   size?: number;
   rounded?: "square" | "circle";
+  /** Hard drop offset for the outlined variants. */
+  offset?: number;
   disabled?: boolean;
 }
 
-/**
- * Rounded-square or circular icon control. The white shadowed square is the
- * signature back control on every onboarding screen.
- */
+const FILLS: Record<IconButtonVariant, string> = {
+  surface: brut.white,
+  paper: brut.paper,
+  yellow: brut.yellow,
+  ghost: "transparent",
+};
+
+/** Outlined square or circular icon control, e.g. the back button. */
 export function IconButton({
   accessibilityLabel,
   onPress,
@@ -26,52 +38,39 @@ export function IconButton({
   variant = "surface",
   size = layout.controlHeight,
   rounded = "square",
+  offset = 3,
   disabled = false,
 }: IconButtonProps) {
+  const isGhost = variant === "ghost";
+  const resting = isGhost ? 0 : offset;
+
   return (
     <Pressable
       accessibilityRole="button"
       accessibilityLabel={accessibilityLabel}
       accessibilityState={{ disabled }}
       disabled={disabled}
+      hitSlop={size < layout.controlHeight ? 6 : 0}
       onPress={onPress}
-      style={({ pressed }) => [
-        styles.button,
-        variantStyles[variant],
-        {
+      style={({ pressed }) => {
+        const shift = pressed && resting > 0 ? motion.pressShift : 0;
+
+        return {
           width: size,
           height: size,
-          borderRadius: rounded === "circle" ? radii.pill : radii.md,
+          alignItems: "center",
+          justifyContent: "center",
+          borderRadius: rounded === "circle" ? radii.pill : radii.block,
+          borderWidth: isGhost ? 0 : brut.border,
+          borderColor: brut.ink,
+          backgroundColor: FILLS[variant],
+          boxShadow: drop(resting - shift),
           opacity: disabled ? 0.45 : 1,
-          transform: [{ scale: pressed ? motion.pressScaleCompact : 1 }],
-        },
-      ]}
+          transform: [{ translateX: shift }, { translateY: shift }],
+        };
+      }}
     >
       {children}
     </Pressable>
   );
 }
-
-const variantStyles = StyleSheet.create({
-  surface: {
-    backgroundColor: colors.surface,
-    borderColor: colors.border,
-    ...shadows.sm,
-  },
-  tint: {
-    backgroundColor: colors.primaryTint,
-    borderColor: "transparent",
-  },
-  ghost: {
-    backgroundColor: "transparent",
-    borderColor: "transparent",
-  },
-});
-
-const styles = StyleSheet.create({
-  button: {
-    alignItems: "center",
-    justifyContent: "center",
-    borderWidth: 1,
-  },
-});

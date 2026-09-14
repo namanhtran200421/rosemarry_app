@@ -1,7 +1,8 @@
-import type { ReactNode } from "react";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { Pressable, StyleSheet, Text } from "react-native";
 
-import { colors, fonts, motion, radii, typography } from "../theme/tokens";
+import { brut, drop, fonts, radii } from "../theme/tokens";
+
+import { Icon, type IconName } from "./Icon";
 
 type ChipSize = "sm" | "md";
 
@@ -12,13 +13,15 @@ interface ChipProps {
   onPress: () => void;
   accessibilityHint?: string;
   /** Leading line icon, shown before the label. */
-  icon?: ReactNode;
+  icon?: IconName;
+  /** Shows a trailing ✕ on selected chips that can be removed. */
+  removable?: boolean;
   /** Fills the parent and left-aligns content, for grid layouts. */
   fullWidth?: boolean;
   disabled?: boolean;
 }
 
-/** Toggle pill. Selected fills solid brand; unselected is white + hairline. */
+/** Toggle pill. Selected fills yellow and gains a drop; unselected is white. */
 export function Chip({
   label,
   selected = false,
@@ -26,10 +29,11 @@ export function Chip({
   onPress,
   accessibilityHint,
   icon,
+  removable = false,
   fullWidth = false,
   disabled = false,
 }: ChipProps) {
-  const metrics = sizes[size];
+  const metrics = SIZES[size];
 
   return (
     <Pressable
@@ -43,41 +47,26 @@ export function Chip({
         fullWidth && styles.chipFullWidth,
         {
           height: metrics.height,
-          paddingHorizontal: metrics.paddingHorizontal,
+          paddingLeft: icon ? 14 : 17,
+          paddingRight: 17,
           opacity: disabled ? 0.45 : 1,
-          backgroundColor: selected ? colors.primary : colors.surface,
-          borderColor: selected ? colors.primary : colors.border,
-          transform: [{ scale: pressed ? motion.pressScaleCompact : 1 }],
+          backgroundColor: selected ? brut.yellow : brut.white,
+          boxShadow: drop(selected && !pressed ? 3 : 0),
         },
       ]}
     >
-      {icon ? <View style={styles.icon}>{icon}</View> : null}
-      <Text
-        style={[
-          styles.label,
-          {
-            fontSize: metrics.fontSize,
-            color: selected ? colors.onPrimary : colors.text,
-          },
-        ]}
-      >
+      {icon ? <Icon name={icon} size={17} /> : null}
+      <Text numberOfLines={1} style={[styles.label, { fontSize: metrics.fontSize }]}>
         {label}
       </Text>
+      {removable && selected ? <Icon name="X" size={14} /> : null}
     </Pressable>
   );
 }
 
-const sizes = {
-  sm: {
-    height: 38,
-    paddingHorizontal: 16,
-    fontSize: typography.caption.fontSize,
-  },
-  md: {
-    height: 50,
-    paddingHorizontal: 20,
-    fontSize: typography.callout.fontSize,
-  },
+const SIZES = {
+  sm: { height: 40, fontSize: 13 },
+  md: { height: 48, fontSize: 14.5 },
 } as const;
 
 const styles = StyleSheet.create({
@@ -86,18 +75,17 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     flexDirection: "row",
     gap: 8,
-    borderWidth: 1,
+    borderWidth: brut.borderThin,
+    borderColor: brut.ink,
     borderRadius: radii.pill,
   },
   chipFullWidth: {
     width: "100%",
     justifyContent: "flex-start",
   },
-  icon: {
-    alignItems: "center",
-    justifyContent: "center",
-  },
   label: {
-    fontFamily: fonts.medium,
+    flexShrink: 1,
+    color: brut.ink,
+    fontFamily: fonts.bold,
   },
 });

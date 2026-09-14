@@ -8,8 +8,8 @@ import {
 } from "../../../shared/theme/tokens";
 import { AppButton } from "../../../shared/ui/AppButton";
 import { SegmentedControl } from "../../../shared/ui/SegmentedControl";
+import { Slider } from "../../../shared/ui/Slider";
 import { OnboardingScreen } from "../components/OnboardingScreen";
-import { Slider } from "../components/Slider";
 import { StepTitle } from "../components/StepTitle";
 import { TOTAL_STEPS, type StepScreenProps } from "../types/onboarding.types";
 
@@ -56,7 +56,7 @@ export function PreferencesStep({
 
       <Slider
         label="Maximum distance"
-        unit=" km"
+        format={(value) => `${value} km`}
         min={1}
         max={100}
         value={preferences.distance}

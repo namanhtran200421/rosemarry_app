@@ -1,8 +1,8 @@
-import { Feather } from "@expo/vector-icons";
 import { StyleSheet, View } from "react-native";
 
-import { colors, spacing } from "../../../shared/theme/tokens";
+import { spacing } from "../../../shared/theme/tokens";
 import { AppButton } from "../../../shared/ui/AppButton";
+import type { IconName } from "../../../shared/ui/Icon";
 import { OptionRow } from "../../../shared/ui/OptionRow";
 import { OnboardingScreen } from "../components/OnboardingScreen";
 import { StepTitle } from "../components/StepTitle";
@@ -12,37 +12,37 @@ const OPTIONS: {
   id: string;
   title: string;
   subtitle: string;
-  icon: keyof typeof Feather.glyphMap;
+  icon: IconName;
 }[] = [
   {
     id: "long",
     title: "Long-term relationship",
     subtitle: "Looking for something serious",
-    icon: "heart",
+    icon: "HeartOutline",
   },
   {
     id: "short",
     title: "Short-term relationship",
     subtitle: "Something meaningful, but don't last",
-    icon: "star",
+    icon: "Star",
   },
   {
     id: "casual",
     title: "Casual dating",
     subtitle: "Keeping it casual and fun",
-    icon: "coffee",
+    icon: "Coffee",
   },
   {
     id: "friends",
     title: "New friends",
     subtitle: "Looking to meet new connections",
-    icon: "users",
+    icon: "Users",
   },
   {
     id: "unsure",
     title: "Not sure yet",
     subtitle: "Figuring it out as I go",
-    icon: "more-horizontal",
+    icon: "Dots",
   },
 ];
 
@@ -71,10 +71,7 @@ export function LookingForStep({
             title={title}
             subtitle={subtitle}
             selected={profile.lookingFor === id}
-            selectedStyle="tint"
-            leadingIcon={
-              <Feather name={icon} size={22} color={colors.primaryAccessible} />
-            }
+            icon={icon}
             onPress={() => update("lookingFor", id)}
           />
         ))}

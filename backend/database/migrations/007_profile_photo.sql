@@ -4,7 +4,8 @@ create table profile_photos (
     media_id integer,
     photo_order int not null, 
     is_primary boolean not null,
-    updated_at timestamptz not null,
+    created_at timestamptz not null default now(),
+    updated_at timestamptz not null default now(),
 
 constraint pk_profile_photo primary key(user_id, media_id),
 

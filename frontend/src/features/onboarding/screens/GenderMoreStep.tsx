@@ -46,7 +46,6 @@ export function GenderMoreStep({
             key={gender}
             title={gender}
             selected={profile.gender === gender}
-            selectedStyle="fill"
             showIndicator={false}
             onPress={() => update("gender", gender)}
           />

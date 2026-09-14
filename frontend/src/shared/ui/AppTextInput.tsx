@@ -8,11 +8,12 @@ import {
 } from "react-native";
 
 import {
+  brut,
   colors,
+  drop,
   fonts,
   layout,
   radii,
-  shadows,
   spacing,
   typography,
 } from "../theme/tokens";
@@ -21,11 +22,16 @@ export interface AppTextInputProps extends TextInputProps {
   label: string;
   helperText?: string;
   errorText?: string;
+  /** Decorative icon displayed inside the left edge, e.g. a location pin. */
+  leadingIcon?: ReactNode;
   /** Optional control displayed inside the right edge of the input. */
   trailingControl?: ReactNode;
 }
 
-/** Shared text field with stable help/error space and accessible input states. */
+/**
+ * Shared text field with stable help/error space and accessible input states.
+ * The field is a white outlined pill; focus swaps its ink drop for brand pink.
+ */
 export const AppTextInput = forwardRef<TextInput, AppTextInputProps>(
   function AppTextInput(
     {
@@ -36,6 +42,7 @@ export const AppTextInput = forwardRef<TextInput, AppTextInputProps>(
       onBlur,
       onFocus,
       style,
+      leadingIcon,
       trailingControl,
       ...textInputProps
     },
@@ -48,7 +55,29 @@ export const AppTextInput = forwardRef<TextInput, AppTextInputProps>(
     return (
       <View style={styles.field}>
         <Text style={styles.label}>{label}</Text>
-        <View style={styles.inputContainer}>
+        <View
+          style={[
+            styles.inputContainer,
+            {
+              borderColor: hasError ? colors.danger : brut.ink,
+              boxShadow: drop(
+                isFocused ? 4 : 3,
+                isFocused ? colors.primary : brut.ink,
+              ),
+            },
+            !editable && styles.inputDisabled,
+          ]}
+        >
+          {leadingIcon ? (
+            <View
+              accessible={false}
+              accessibilityElementsHidden
+              importantForAccessibility="no-hide-descendants"
+              style={styles.leadingIcon}
+            >
+              {leadingIcon}
+            </View>
+          ) : null}
           <TextInput
             {...textInputProps}
             ref={ref}
@@ -68,13 +97,11 @@ export const AppTextInput = forwardRef<TextInput, AppTextInputProps>(
               setIsFocused(true);
               onFocus?.(event);
             }}
-            placeholderTextColor={colors.textFaint}
+            placeholderTextColor={colors.textSecondary}
             selectionColor={colors.primary}
             style={[
               styles.input,
-              isFocused && styles.inputFocused,
-              hasError && styles.inputError,
-              !editable && styles.inputDisabled,
+              Boolean(leadingIcon) && styles.inputWithLeadingIcon,
               Boolean(trailingControl) && styles.inputWithTrailingControl,
               style,
             ]}
@@ -100,47 +127,44 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
   },
   label: {
-    color: colors.text,
-    fontFamily: fonts.semibold,
+    color: brut.ink,
+    fontFamily: fonts.bold,
     fontSize: typography.callout.fontSize,
     lineHeight: typography.callout.lineHeight,
   },
   inputContainer: {
-    position: "relative",
-  },
-  input: {
+    flexDirection: "row",
+    alignItems: "center",
     minHeight: layout.fieldHeight,
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: radii.md,
-    paddingHorizontal: 18,
-    paddingVertical: spacing.md,
-    backgroundColor: colors.surface,
-    color: colors.text,
-    fontFamily: fonts.regular,
-    fontSize: typography.body.fontSize,
-    lineHeight: typography.body.lineHeight,
-    ...shadows.xs,
-  },
-  inputFocused: {
-    borderColor: colors.primary,
-    borderWidth: 2,
-    paddingHorizontal: 17,
-    paddingVertical: spacing.md - 1,
-  },
-  inputError: {
-    borderColor: colors.danger,
+    borderWidth: brut.border,
+    borderRadius: radii.pill,
+    backgroundColor: brut.white,
   },
   inputDisabled: {
     opacity: 0.5,
   },
+  leadingIcon: {
+    paddingLeft: 18,
+  },
+  input: {
+    flex: 1,
+    minWidth: 0,
+    alignSelf: "stretch",
+    paddingHorizontal: 18,
+    paddingVertical: spacing.md,
+    color: brut.ink,
+    fontFamily: fonts.regular,
+    fontSize: typography.body.fontSize,
+    lineHeight: typography.body.lineHeight,
+  },
+  inputWithLeadingIcon: {
+    paddingLeft: 10,
+  },
   inputWithTrailingControl: {
-    paddingRight: 58,
+    paddingRight: spacing.sm,
   },
   trailingControl: {
-    position: "absolute",
-    top: 6,
-    right: 6,
+    marginRight: 5,
   },
   supportingText: {
     minHeight: typography.caption.lineHeight,

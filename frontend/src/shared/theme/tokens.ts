@@ -31,29 +31,43 @@ export const palette = {
 
   ink: "#241A1D",
   gray700: "#4D3F43",
+  /** Secondary copy. Darker than the source `#857076`, which reads 4.3:1. */
+  gray600: "#7A676D",
   gray500: "#857076",
   gray400: "#B2A3A8",
   gray300: "#D8CCD0",
   gray200: "#ECE1E4",
   gray100: "#F6EEF0",
   white: "#FFFFFF",
+
+  /* Neo-brutalist register: outlines, paper and the four state fills. */
+  brutInk: "#17181F",
+  brutPaper: "#FDF8EE",
+  /** Source `#7C5CFF` gives white text 4.35:1; this passes AA at 4.76:1. */
+  brutPurple: "#7552FF",
+  brutYellow: "#F5C33B",
+  brutPink: "#FF5FA2",
+  brutGreen: "#2ECF96",
+  brutDisabled: "#E6E1D6",
 } as const;
 
 export const colors = {
-  background: palette.cream50,
+  background: palette.brutPaper,
+  /** Discover's photo cards sit on the warmer cream. */
+  backgroundWarm: palette.cream50,
   surface: palette.white,
   surfaceTint: palette.pink50,
   surfaceSunken: palette.gray100,
 
-  text: palette.ink,
-  textSecondary: palette.gray500,
-  textMuted: palette.gray500,
+  text: palette.brutInk,
+  textSecondary: palette.gray600,
+  textMuted: palette.gray600,
   /** Placeholder and decorative text only — too light for body copy. */
   textFaint: palette.gray400,
-  onPrimary: palette.ink,
+  onPrimary: palette.brutInk,
 
-  border: palette.gray200,
-  borderStrong: palette.gray300,
+  border: palette.brutInk,
+  borderStrong: palette.brutInk,
 
   primary: palette.pink700,
   primaryHover: palette.pink600,
@@ -62,25 +76,59 @@ export const colors = {
   /**
    * Deep brand pink. White text on `primary` measures 2.5:1, which fails
    * WCAG AA; this reads 7.5:1 and is the accessible substitute for any
-   * pink surface that carries white text. See DESIGN.md.
+   * pink text on a light ground. See DESIGN.md.
    */
   primaryAccessible: palette.pink800,
 
   accentRed: palette.red600,
   accentOrange: palette.orange400,
-  progressTrack: palette.ink,
+  progressTrack: palette.brutInk,
 
-  success: "#1F9D5F",
+  success: palette.brutGreen,
   danger: palette.red600,
   dangerStrong: palette.red700,
   dangerSurface: palette.red100,
 
-  link: palette.red600,
+  link: palette.brutInk,
   focus: palette.pink700,
-  focusRing: "rgba(242, 127, 168, 0.35)",
-  selectedRing: palette.pink700,
-  overlayScrim: "rgba(12, 20, 17, 0.55)",
+  overlayScrim: "rgba(23, 24, 31, 0.45)",
 } as const;
+
+/**
+ * The brutalist material: every surface is a hard-outlined block with a
+ * solid offset drop, and each fill states what something is.
+ */
+export const brut = {
+  ink: palette.brutInk,
+  paper: palette.brutPaper,
+  purple: palette.brutPurple,
+  yellow: palette.brutYellow,
+  pink: palette.brutPink,
+  green: palette.brutGreen,
+  disabled: palette.brutDisabled,
+  white: palette.white,
+  /** Category / emphasis blocks, in rotation order. */
+  blocks: [
+    palette.brutPurple,
+    palette.brutYellow,
+    palette.brutPink,
+    palette.brutGreen,
+  ],
+  border: 2,
+  borderThin: 1.5,
+} as const;
+
+/** Hard offset shadow with no blur — depth reads as the offset size. */
+export function drop(offset: number, color: string = brut.ink): string {
+  return offset > 0 ? `${offset}px ${offset}px 0 ${color}` : "none";
+}
+
+/** Icon and label color for content placed on a block fill. */
+export function onBlock(fill: string): string {
+  return fill === brut.purple || fill === colors.accentRed || fill === brut.ink
+    ? palette.white
+    : brut.ink;
+}
 
 /** 4px base scale. Numeric keys mirror the CSS `--space-*` tokens. */
 export const spacing = {
@@ -102,55 +150,25 @@ export const layout = {
   screenPadX: 24,
   screenPadY: 20,
   stackGap: 12,
-  fieldHeight: 56,
+  fieldHeight: 54,
   controlHeight: 44,
   contentMaxWidth: 440,
+  /** Clearance below tab content so nothing hides behind the floating bar. */
+  tabBarClearance: 96,
 } as const;
 
 export const radii = {
+  tag: 6,
   xs: 8,
+  block: 10,
   sm: 12,
+  card: 14,
   md: 16,
   lg: 18,
   xl: 22,
   xxl: 28,
   pill: 999,
 } as const;
-
-/**
- * Soft, low, warm-tinted elevation. The design never uses a hard drop
- * shadow; selection is expressed with a pink ring instead.
- */
-export const shadows = {
-  xs: {
-    shadowColor: "#0C1411",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
-    elevation: 1,
-  },
-  sm: {
-    shadowColor: "#0C1411",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
-    shadowRadius: 8,
-    elevation: 2,
-  },
-  md: {
-    shadowColor: "#0C1411",
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.08,
-    shadowRadius: 20,
-    elevation: 4,
-  },
-  lg: {
-    shadowColor: "#0C1411",
-    shadowOffset: { width: 0, height: 16 },
-    shadowOpacity: 0.12,
-    shadowRadius: 40,
-    elevation: 8,
-  },
-};
 
 /**
  * DynaPuff — the rounded display face the design specifies for every text
@@ -170,23 +188,23 @@ export const fonts = {
  * to absolute values, and letter spacing resolves `-0.02em` per size.
  */
 export const typography = {
-  display: { fontSize: 30, lineHeight: 35, letterSpacing: -0.6 },
+  hero: { fontSize: 34, lineHeight: 38, letterSpacing: -0.4 },
+  display: { fontSize: 30, lineHeight: 34, letterSpacing: -0.6 },
   title: { fontSize: 26, lineHeight: 30, letterSpacing: -0.52 },
-  h2: { fontSize: 22, lineHeight: 25, letterSpacing: -0.44 },
+  h2: { fontSize: 22, lineHeight: 26, letterSpacing: -0.44 },
   h3: { fontSize: 18, lineHeight: 23, letterSpacing: 0 },
   body: { fontSize: 16, lineHeight: 24, letterSpacing: 0 },
   button: { fontSize: 16, lineHeight: 20, letterSpacing: 0 },
   callout: { fontSize: 15, lineHeight: 22, letterSpacing: 0 },
   sub: { fontSize: 14, lineHeight: 21, letterSpacing: 0 },
-  caption: { fontSize: 13, lineHeight: 20, letterSpacing: 0 },
-  micro: { fontSize: 12, lineHeight: 18, letterSpacing: 0 },
-  /** Brief uppercase eyebrows only. */
-  eyebrow: { fontSize: 12, lineHeight: 18, letterSpacing: 0.48 },
+  caption: { fontSize: 13, lineHeight: 19, letterSpacing: 0 },
+  micro: { fontSize: 12, lineHeight: 17, letterSpacing: 0 },
+  /** Uppercase micro-labels on tags ("4 OF 6 HAVE PLAYED"). */
+  tag: { fontSize: 10.5, lineHeight: 14, letterSpacing: 0.84 },
 } as const;
 
-/** Press feedback is a quiet scale-down — no color flip, no ripple. */
+/** Press feedback pushes the block into its own shadow — no color flip. */
 export const motion = {
-  pressScale: 0.98,
-  pressScaleCompact: 0.94,
+  pressShift: 2,
   durationMs: 130,
 } as const;

@@ -1,6 +1,8 @@
 import { StyleSheet, Text, View } from "react-native";
 
-import { colors, fonts, radii, spacing, typography } from "../theme/tokens";
+import { brut, colors, fonts, radii, typography } from "../theme/tokens";
+
+import { Icon } from "./Icon";
 
 interface ErrorMessageProps {
   message: string;
@@ -14,6 +16,7 @@ export function ErrorMessage({ message }: ErrorMessageProps) {
       accessibilityRole="alert"
       style={styles.container}
     >
+      <Icon name="X" size={16} color={colors.dangerStrong} />
       <Text style={styles.text}>{message}</Text>
     </View>
   );
@@ -21,19 +24,22 @@ export function ErrorMessage({ message }: ErrorMessageProps) {
 
 const styles = StyleSheet.create({
   container: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
     minHeight: 48,
-    marginTop: spacing.sm,
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.md,
-    borderLeftWidth: 3,
-    borderRadius: radii.md,
-    borderColor: colors.dangerStrong,
+    marginTop: 8,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderRadius: radii.sm,
+    borderWidth: brut.border,
+    borderColor: brut.ink,
     backgroundColor: colors.dangerSurface,
-    justifyContent: "center",
   },
   text: {
+    flex: 1,
     color: colors.dangerStrong,
-    fontFamily: fonts.regular,
+    fontFamily: fonts.medium,
     fontSize: typography.callout.fontSize,
     lineHeight: typography.callout.lineHeight,
   },

@@ -1,9 +1,9 @@
-import { Feather } from "@expo/vector-icons";
 import { StyleSheet, View } from "react-native";
 
-import { colors, spacing } from "../../../shared/theme/tokens";
+import { spacing } from "../../../shared/theme/tokens";
 import { AppButton } from "../../../shared/ui/AppButton";
 import { Chip } from "../../../shared/ui/Chip";
+import type { IconName } from "../../../shared/ui/Icon";
 import { OnboardingScreen } from "../components/OnboardingScreen";
 import { StepCounter } from "../components/StepCounter";
 import { StepTitle } from "../components/StepTitle";
@@ -11,21 +11,21 @@ import { TOTAL_STEPS, type StepScreenProps } from "../types/onboarding.types";
 
 const MAX_INTERESTS = 5;
 
-const INTERESTS: { label: string; icon: keyof typeof Feather.glyphMap }[] = [
-  { label: "Photography", icon: "camera" },
-  { label: "Shopping", icon: "shopping-bag" },
-  { label: "Karaoke", icon: "mic" },
-  { label: "Yoga", icon: "sunrise" },
-  { label: "Cooking", icon: "coffee" },
-  { label: "Tennis", icon: "target" },
-  { label: "Run", icon: "activity" },
-  { label: "Swimming", icon: "wind" },
-  { label: "Art", icon: "edit-3" },
-  { label: "Traveling", icon: "send" },
-  { label: "Extreme", icon: "zap" },
-  { label: "Music", icon: "music" },
-  { label: "Drink", icon: "droplet" },
-  { label: "Video games", icon: "monitor" },
+const INTERESTS: { label: string; icon: IconName }[] = [
+  { label: "Photography", icon: "Camera" },
+  { label: "Shopping", icon: "ShoppingBag" },
+  { label: "Karaoke", icon: "Mic" },
+  { label: "Yoga", icon: "Flower" },
+  { label: "Cooking", icon: "Coffee" },
+  { label: "Tennis", icon: "Racket" },
+  { label: "Run", icon: "Activity" },
+  { label: "Swimming", icon: "Waves" },
+  { label: "Art", icon: "Palette" },
+  { label: "Traveling", icon: "Plane" },
+  { label: "Extreme", icon: "Sparkles" },
+  { label: "Music", icon: "Music" },
+  { label: "Drink", icon: "Wine" },
+  { label: "Video games", icon: "Gamepad" },
 ];
 
 export function InterestsStep({
@@ -72,13 +72,7 @@ export function InterestsStep({
                 selected={isSelected}
                 disabled={!isSelected && atLimit}
                 fullWidth
-                icon={
-                  <Feather
-                    name={icon}
-                    size={17}
-                    color={isSelected ? colors.onPrimary : colors.text}
-                  />
-                }
+                icon={icon}
                 onPress={() => toggle(label)}
               />
             </View>

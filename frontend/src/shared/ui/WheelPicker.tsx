@@ -8,27 +8,28 @@ import {
   type NativeSyntheticEvent,
 } from "react-native";
 
-import { colors, fonts, radii, spacing } from "../../../shared/theme/tokens";
+import { brut, drop, fonts, radii } from "../theme/tokens";
 
-const ITEM_HEIGHT = 56;
 const VISIBLE_ITEMS = 5;
-const PAD = ITEM_HEIGHT * Math.floor(VISIBLE_ITEMS / 2);
 
 interface WheelPickerProps {
   values: string[];
   index: number;
   onIndex: (index: number) => void;
   label?: string;
+  itemHeight?: number;
 }
 
-/** Snap-scrolling value wheel with a brand-ringed centre band. */
+/** Snap-scrolling value wheel on an outlined card with a yellow centre band. */
 export function WheelPicker({
   values,
   index,
   onIndex,
   label,
+  itemHeight = 56,
 }: WheelPickerProps) {
   const scrollRef = useRef<ScrollView>(null);
+  const pad = itemHeight * Math.floor(VISIBLE_ITEMS / 2);
 
   function selectIndex(nextIndex: number): void {
     const clampedIndex = Math.max(0, Math.min(values.length - 1, nextIndex));
@@ -39,19 +40,22 @@ export function WheelPicker({
 
     onIndex(clampedIndex);
     scrollRef.current?.scrollTo({
-      y: clampedIndex * ITEM_HEIGHT,
+      y: clampedIndex * itemHeight,
       animated: true,
     });
   }
 
   function handleSettle(event: NativeSyntheticEvent<NativeScrollEvent>): void {
     const offset = event.nativeEvent.contentOffset.y;
-    selectIndex(Math.round(offset / ITEM_HEIGHT));
+    selectIndex(Math.round(offset / itemHeight));
   }
 
   return (
-    <View style={styles.container}>
-      <View pointerEvents="none" style={styles.band} />
+    <View style={[styles.container, { height: itemHeight * VISIBLE_ITEMS }]}>
+      <View
+        pointerEvents="none"
+        style={[styles.band, { top: pad, height: itemHeight }]}
+      />
       <ScrollView
         ref={scrollRef}
         accessibilityRole="adjustable"
@@ -65,27 +69,25 @@ export function WheelPicker({
             selectIndex(index - 1);
           }
         }}
-        contentContainerStyle={styles.content}
-        contentOffset={{ x: 0, y: index * ITEM_HEIGHT }}
+        contentContainerStyle={{ paddingVertical: pad }}
+        contentOffset={{ x: 0, y: index * itemHeight }}
         decelerationRate="fast"
         onMomentumScrollEnd={handleSettle}
         showsVerticalScrollIndicator={false}
-        snapToInterval={ITEM_HEIGHT}
+        snapToInterval={itemHeight}
       >
         {values.map((value, itemIndex) => {
           const distance = Math.abs(itemIndex - index);
-          const isActive = distance === 0;
 
           return (
-            <View key={value} style={styles.item}>
+            <View key={value} style={[styles.item, { height: itemHeight }]}>
               <Text
                 style={[
                   styles.label,
-                  isActive
-                    ? styles.labelActive
-                    : distance === 1
-                      ? styles.labelNear
-                      : styles.labelFar,
+                  {
+                    fontSize: distance === 0 ? itemHeight * 0.54 : itemHeight * 0.37,
+                    opacity: distance === 0 ? 1 : distance === 1 ? 0.5 : 0.25,
+                  },
                 ]}
               >
                 {value}
@@ -100,45 +102,29 @@ export function WheelPicker({
 
 const styles = StyleSheet.create({
   container: {
-    height: ITEM_HEIGHT * VISIBLE_ITEMS,
-    marginVertical: spacing.sm,
-    backgroundColor: colors.surfaceSunken,
-    borderRadius: radii.xxl,
+    marginVertical: 10,
+    backgroundColor: brut.white,
+    borderRadius: radii.md,
+    borderWidth: brut.border,
+    borderColor: brut.ink,
+    boxShadow: drop(4),
     overflow: "hidden",
   },
   band: {
     position: "absolute",
-    left: spacing.xl,
-    right: spacing.xl,
-    top: PAD,
-    height: ITEM_HEIGHT,
-    zIndex: 2,
-    borderTopWidth: 2,
-    borderBottomWidth: 2,
-    borderColor: colors.primary,
-  },
-  content: {
-    paddingVertical: PAD,
+    left: 0,
+    right: 0,
+    borderTopWidth: brut.border,
+    borderBottomWidth: brut.border,
+    borderColor: brut.ink,
+    backgroundColor: brut.yellow,
   },
   item: {
-    height: ITEM_HEIGHT,
     alignItems: "center",
     justifyContent: "center",
   },
   label: {
-    fontFamily: fonts.medium,
-  },
-  labelActive: {
+    color: brut.ink,
     fontFamily: fonts.bold,
-    fontSize: 30,
-    color: colors.text,
-  },
-  labelNear: {
-    fontSize: 21,
-    color: colors.textFaint,
-  },
-  labelFar: {
-    fontSize: 21,
-    color: colors.borderStrong,
   },
 });

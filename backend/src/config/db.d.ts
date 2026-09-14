@@ -180,6 +180,7 @@ export interface Profiles {
   datingGoal: DatingGoalEnum | null;
   displayName: string;
   genderId: number | null;
+  onboardCompletedAt: Timestamp | null;
   updatedAt: Generated<Timestamp>;
   userId: number;
 }
