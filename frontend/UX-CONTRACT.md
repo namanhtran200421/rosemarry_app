@@ -34,6 +34,10 @@ Do not create one-off replacements for these patterns inside a screen.
   other request failures appear above the fields so they remain visible.
 - Every pushed auth and onboarding screen exposes a back action. Back from the
   first onboarding step signs out and returns to the signed-out flow.
+- Authenticated users must pass the server-backed age-verification gate before
+  onboarding or protected app screens. Approval comes from the backend status,
+  never from callback URL parameters. Pending, review, rejection, expiry, and
+  service failures each keep a visible recovery action and confirmed logout.
 - Onboarding branches are stored in navigation history, so Back returns to the
   actual previous answer rather than a guessed linear step.
 - Completion enters Home. Logout asks for confirmation, then returns to Welcome

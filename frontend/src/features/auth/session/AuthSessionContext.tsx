@@ -9,6 +9,8 @@ export interface AuthSessionContextValue {
   startupError: string | null;
   requestSmsCode: (phoneNumber: string) => Promise<void>;
   verifySmsCode: (phoneNumber: string, code: string) => Promise<void>;
+  /** Returns a current Auth0 access token, refreshing it when needed. */
+  getAccessToken: () => Promise<string>;
   /** Opens Auth0 and signs the user in with Google. */
   signInWithGoogle: () => Promise<void>;
   /** Signs in with credentials entered on Rosemarry's email login screen. */
@@ -18,6 +20,8 @@ export interface AuthSessionContextValue {
     email: string,
     password: string,
   ) => Promise<void>;
+  /** Keeps the authenticated session active after onboarding finishes. */
+  completeOnboarding: () => void;
   logout: () => Promise<void>;
 }
 

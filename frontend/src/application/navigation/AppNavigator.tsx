@@ -1,13 +1,15 @@
 import { NavigationContainer } from "@react-navigation/native";
 
+import { LogoutButton } from "../../features/auth/components/LogoutButton";
 import { useAuthSession } from "../../features/auth/session/AuthSessionContext";
+import { VerificationGate } from "../../features/verification/components/VerificationGate";
 import { LoadingScreen } from "../../shared/ui/LoadingScreen";
 
 import { AuthenticatedNavigator } from "./AuthenticatedNavigator";
 import { AuthNavigator } from "./AuthNavigator";
 
 export function AppNavigator() {
-  const { status } = useAuthSession();
+  const { getAccessToken, status } = useAuthSession();
 
   if (status === "initializing") {
     return <LoadingScreen label="Restoring your session" />;
@@ -18,7 +20,16 @@ export function AppNavigator() {
 
   return (
     <NavigationContainer>
-      {isAuthenticated ? <AuthenticatedNavigator /> : <AuthNavigator />}
+      {isAuthenticated ? (
+        <VerificationGate
+          accountAction={<LogoutButton />}
+          getAccessToken={getAccessToken}
+        >
+          <AuthenticatedNavigator />
+        </VerificationGate>
+      ) : (
+        <AuthNavigator />
+      )}
     </NavigationContainer>
   );
 }

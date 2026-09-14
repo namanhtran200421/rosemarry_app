@@ -96,3 +96,8 @@ Authentication concerns are intentionally separated:
 Navigation is split similarly: `AppNavigator` owns the session boundary,
 `AuthNavigator` owns the signed-out flow, and `AuthenticatedNavigator` owns the
 onboarding/home flow.
+
+Authenticated navigation is wrapped by `VerificationGate`. It obtains a fresh
+access token through the session contract, launches Didit's hosted camera flow,
+and trusts only the backend status endpoint after returning. Mock auth simulates
+approval locally so frontend development does not depend on Didit.

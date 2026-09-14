@@ -1,16 +1,25 @@
-import { Response, Router, json, type Request, type RequestHandler } from "express";
- 
+import {
+  Response,
+  Router,
+  json,
+  type Request,
+  type RequestHandler,
+} from "express";
+
 import { AppError } from "../../errors/appError.js";
 import {
-    createSession,
-    verifyWebhookSignature,
-    type DiditWebhookEvent,
+  createSession,
+  verifyWebhookSignature,
+  type DiditWebhookEvent,
 } from "../service/id_verification.service.js";
 import {
-    toVerificationStatus,
-    verificationRepo,
+  toVerificationStatus,
+  verificationRepo,
 } from "../repository/id_verification.repo.js";
-import { requireApplicationUser, validateAccessToken } from "../../middleware/auth.middleware.js";
+import {
+  requireApplicationUser,
+  validateAccessToken,
+} from "../../middleware/auth.middleware.js";
 
 /**
  * Returns the internal Rosemarry user ID populated by
@@ -18,13 +27,41 @@ import { requireApplicationUser, validateAccessToken } from "../../middleware/au
  *
  * Keeping the undefined case provides defense in depth if the router is ever
  * mounted without its required authentication middleware.
- * 
+ *
  * Steve fix: simpified the function.
  */
 function readUserId(req: Request): number | undefined {
   return req.user?.id;
 }
- 
+
+/** Reports the signed-in user's latest trusted verification state. */
+const getVerificationStatus: RequestHandler = async function (req, res, next) {
+  const userId = readUserId(req);
+
+  if (userId === undefined) {
+    next(
+      new AppError({
+        statusCode: 401,
+        code: "UNAUTHENTICATED",
+        message: "You must be signed in to check verification status",
+      }),
+    );
+
+    return;
+  }
+
+  try {
+    const [latest, ageVerified] = await Promise.all([
+      verificationRepo.findLatestByUserId(userId),
+      verificationRepo.isUserVerified(userId),
+    ]);
+
+    res.json({ ageVerified, status: latest?.status ?? null });
+  } catch (error) {
+    next(error);
+  }
+};
+
 /**
  * Creates a Didit session and returns the hosted URL for the client.
  * Uses User ID to verify that the requester is authenticated.
@@ -33,43 +70,52 @@ function readUserId(req: Request): number | undefined {
  * @param res - the http response
  * @param next - passes failures to errorHandler
  */
-const startVerification: RequestHandler = async function (req:Request, res:Response, next) {
-    const userId = readUserId(req);
- 
-    if (userId === undefined) {
-        next(
-            new AppError({
-                statusCode: 401,
-                code: "UNAUTHENTICATED",
-                message: "You must be signed in to verify your age",
-            }),
-        );
- 
-        return;
-    }
- 
-    try {
-        const session = await createSession(userId);
-        await verificationRepo.createPending(userId, session.session_id);
- 
-        console.log({
-            scope: "didit",
-            action: "sessionCreated",
-            userId,
-            sessionId: session.session_id,
-        });
- 
-        res.json({ url: session.url, sessionId: session.session_id });
- 
-        return;
-    } catch (error) {
-        console.error({ scope: "didit", action: "startVerification", userId, error });
-        next(error);
- 
-        return;
-    }
+const startVerification: RequestHandler = async function (
+  req: Request,
+  res: Response,
+  next,
+) {
+  const userId = readUserId(req);
+
+  if (userId === undefined) {
+    next(
+      new AppError({
+        statusCode: 401,
+        code: "UNAUTHENTICATED",
+        message: "You must be signed in to verify your age",
+      }),
+    );
+
+    return;
+  }
+
+  try {
+    const session = await createSession(userId);
+    await verificationRepo.createPending(userId, session.session_id);
+
+    console.log({
+      scope: "didit",
+      action: "sessionCreated",
+      userId,
+      sessionId: session.session_id,
+    });
+
+    res.json({ url: session.url, sessionId: session.session_id });
+
+    return;
+  } catch (error) {
+    console.error({
+      scope: "didit",
+      action: "startVerification",
+      userId,
+      error,
+    });
+    next(error);
+
+    return;
+  }
 };
- 
+
 /**
  * receives status updates from Didit
  *
@@ -85,87 +131,91 @@ const startVerification: RequestHandler = async function (req:Request, res:Respo
  * @param res - the http response, read by Didit as an acknowledgement
  */
 const handleWebhook: RequestHandler = async function (req, res) {
-    const valid = verifyWebhookSignature(
-        req.body,
-        req.get("x-signature-v2"),
-        req.get("x-timestamp"),
+  const valid = verifyWebhookSignature(
+    req.body,
+    req.get("x-signature-v2"),
+    req.get("x-timestamp"),
+  );
+
+  if (!valid) {
+    console.warn({ scope: "didit", action: "webhookRejected" });
+    res.status(401).json({ ok: false });
+
+    return;
+  }
+
+  const event = req.body as DiditWebhookEvent;
+
+  // status.updated is the only subscribed type, but a destination can be
+  // reconfigured in the console without a deploy
+  if (event.webhook_type !== "status.updated" || !event.session_id) {
+    res.status(200).json({ ok: true });
+
+    return;
+  }
+
+  // v3 deliveries carry no event id, so the idempotency key is derived. a
+  // session reaches each status once, and a retry repeats both fields, so
+  // this collides exactly when it should.
+  // x-request-id is not usable for this: it sits alongside sentry trace
+  // headers and is generated per http request, so a retry would get a fresh
+  // one and be processed as new
+
+  const eventKey = `${event.session_id}:${event.status}`;
+
+  try {
+    const result = await verificationRepo.applyWebhookStatus(
+      eventKey,
+      event.session_id,
+      toVerificationStatus(event.status),
     );
- 
-    if (!valid) {
-        console.warn({ scope: "didit", action: "webhookRejected" });
-        res.status(401).json({ ok: false });
- 
-        return;
-    }
- 
-    const event = req.body as DiditWebhookEvent;
- 
-    // status.updated is the only subscribed type, but a destination can be
-    // reconfigured in the console without a deploy
-    if (event.webhook_type !== "status.updated" || !event.session_id) {
-        res.status(200).json({ ok: true });
- 
-        return;
-    }
 
+    console.log({
+      scope: "didit",
+      action: "webhookProcessed",
+      eventKey,
+      sessionId: event.session_id,
+      status: event.status,
+      result,
+    });
 
- 
-    // v3 deliveries carry no event id, so the idempotency key is derived. a
-    // session reaches each status once, and a retry repeats both fields, so
-    // this collides exactly when it should.
-    // x-request-id is not usable for this: it sits alongside sentry trace
-    // headers and is generated per http request, so a retry would get a fresh
-    // one and be processed as new
+    res.status(200).json({ ok: true });
 
-   
-    const eventKey = `${event.session_id}:${event.status}`;
- 
-    try {
-        const result = await verificationRepo.applyWebhookStatus(
-            eventKey,
-            event.session_id,
-            toVerificationStatus(event.status),
-        );
- 
-        console.log({
-            scope: "didit",
-            action: "webhookProcessed",
-            eventKey,
-            sessionId: event.session_id,
-            status: event.status,
-            result,
-        });
- 
-        res.status(200).json({ ok: true });
- 
-        return;
-    } catch (error) {
-        console.error({
-            scope: "didit",
-            action: "webhookFailed",
-            eventKey,
-            sessionId: event.session_id,
-            error,
-        });
- 
-        res.status(500).json({ ok: false });
- 
-        return;
-    }
+    return;
+  } catch (error) {
+    console.error({
+      scope: "didit",
+      action: "webhookFailed",
+      eventKey,
+      sessionId: event.session_id,
+      error,
+    });
+
+    res.status(500).json({ ok: false });
+
+    return;
+  }
 };
- 
+
 const router = Router();
- 
+
+router.get(
+  "/status",
+  validateAccessToken,
+  requireApplicationUser,
+  getVerificationStatus,
+);
+
 router.post(
   "/start",
   validateAccessToken,
   requireApplicationUser,
   startVerification,
 );
- 
+
 // json() is listed explicitly so this works whether or not app.ts applies it
 // globally. X-Signature-V2 signs canonical json rather than raw bytes, so
 // re-encoding by the parser is harmless
 router.post("/webhook", json(), handleWebhook);
- 
+
 export default router;

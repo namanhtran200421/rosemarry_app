@@ -6,6 +6,7 @@ import {
   AuthSessionContextProvider,
   type AuthSessionContextValue,
 } from "./AuthSessionContext";
+import { markOnboardingCompleted } from "./auth-session-state";
 
 const MOCK_SESSION: ApplicationSession = {
   userId: 1,
@@ -17,6 +18,10 @@ const MOCK_SESSION: ApplicationSession = {
 export function MockAuthSessionProvider({ children }: PropsWithChildren) {
   const [status, setStatus] = useState<AuthSessionStatus>("unauthenticated");
   const [session, setSession] = useState<ApplicationSession | null>(null);
+
+  const getAccessToken = useCallback(async (): Promise<string> => {
+    return "mock-access-token";
+  }, []);
 
   const requestSmsCode = useCallback(async (): Promise<void> => {
     setStatus("sending-code");
@@ -42,6 +47,10 @@ export function MockAuthSessionProvider({ children }: PropsWithChildren) {
     setStatus("authenticated");
   }, []);
 
+  const completeOnboarding = useCallback((): void => {
+    setSession(markOnboardingCompleted);
+  }, []);
+
   const logout = useCallback(async (): Promise<void> => {
     setStatus("logging-out");
     await Promise.resolve();
@@ -54,14 +63,18 @@ export function MockAuthSessionProvider({ children }: PropsWithChildren) {
       status,
       session,
       startupError: null,
+      getAccessToken,
       requestSmsCode,
       verifySmsCode,
       signInWithGoogle: signInWithMockProvider,
       signInWithEmailPassword: signInWithMockProvider,
       createAccountWithEmailPassword: signInWithMockProvider,
+      completeOnboarding,
       logout,
     }),
     [
+      completeOnboarding,
+      getAccessToken,
       logout,
       requestSmsCode,
       session,

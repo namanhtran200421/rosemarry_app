@@ -1,5 +1,4 @@
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import { useState } from "react";
 
 import { useAuthSession } from "../../features/auth/session/AuthSessionContext";
 import { HomeScreen } from "../../features/home/screens/HomeScreen";
@@ -14,10 +13,8 @@ const Stack = createNativeStackNavigator<AuthenticatedStackParamList>();
 
 /** Routes available after an application session has been established. */
 export function AuthenticatedNavigator() {
-  const { logout, session } = useAuthSession();
-  const [hasFinishedOnboarding, setHasFinishedOnboarding] = useState(false);
-  const needsOnboarding =
-    session !== null && !session.onboardingCompleted && !hasFinishedOnboarding;
+  const { completeOnboarding, logout, session } = useAuthSession();
+  const needsOnboarding = session !== null && !session.onboardingCompleted;
 
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
@@ -25,7 +22,7 @@ export function AuthenticatedNavigator() {
         <Stack.Screen name="Onboarding">
           {() => (
             <OnboardingFlow
-              onComplete={() => setHasFinishedOnboarding(true)}
+              onComplete={completeOnboarding}
               onExit={() => {
                 void logout();
               }}
