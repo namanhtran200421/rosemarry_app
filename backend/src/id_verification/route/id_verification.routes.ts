@@ -90,8 +90,23 @@ const startVerification: RequestHandler = async function (
   }
 
   try {
+
+    const latest = await verificationRepo.findLatestByUserId(userId);
+    if (
+      latest?.provider === "didit" &&
+      latest.status === "PENDING" &&
+      latest.providerReference && 
+      latest.sessionUrl
+    ){
+      res.json({
+        url: latest.sessionUrl,
+        sessionId: latest.providerReference,
+      });
+
+      return;
+    }
     const session = await createSession(userId);
-    await verificationRepo.createPending(userId, session.session_id);
+    await verificationRepo.createPending(userId, session.session_id, session.url);
 
     console.log({
       scope: "didit",

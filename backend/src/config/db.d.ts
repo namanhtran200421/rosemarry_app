@@ -86,6 +86,7 @@ export interface IdVerifications {
   expiresAt: Timestamp | null;
   provider: string;
   providerReference: string | null;
+  sessionUrl: string | null;
   status: Generated<VerificationStatusEnum>;
   updatedAt: Generated<Timestamp>;
   userId: number;
