@@ -54,7 +54,7 @@ export interface VerificationRepo {
      * @param sessionId - Didit's session id stored as provider_reference
      * @returns the inserted row
      */
-    createPending(userId: number, sessionId: string): Promise<VerificationRecord>;
+    createPending(userId: number, sessionId: string, sessionUrl: string): Promise<VerificationRecord>;
     
     /**
      * finds a user's most recent attempt
@@ -101,7 +101,7 @@ export interface VerificationRepo {
  
  
 export const verificationRepo: VerificationRepo = {
-    async createPending(userId, sessionId) {
+    async createPending(userId, sessionId, sessionUrl) {
         return db
             .insertInto("idVerifications")
             .values({
@@ -109,6 +109,7 @@ export const verificationRepo: VerificationRepo = {
                 verificationType: null,
                 provider: PROVIDER,
                 providerReference: sessionId,
+                sessionUrl,
                 status: "PENDING",
             })
             .returningAll()
