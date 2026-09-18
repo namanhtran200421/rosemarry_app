@@ -19,6 +19,7 @@ export interface VerificationRecord {
     verificationType: VerificationType | null;
     provider: string;
     providerReference: string | null;
+    sessionUrl: string | null;
     status: VerificationStatus;
     verifiedAt: Date | null;
     expiresAt: Date | null;
