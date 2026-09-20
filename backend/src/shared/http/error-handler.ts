@@ -4,7 +4,7 @@ import {
   UnauthorizedError,
 } from "express-oauth2-jwt-bearer";
 
-import { AppError } from "../errors/appError.js";
+import { AppError } from "../errors/app-error.js";
 
 /**
  * Checks whether Express rejected a malformed JSON request body.

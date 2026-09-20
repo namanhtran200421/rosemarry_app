@@ -1,7 +1,8 @@
-import pool, { db } from "../../config/database.js";
-import type { VerificationStatus } from "../types/verification_types.js";
-import type { DiditStatus } from "../service/id_verification.service.js";
-import type { VerificationRecord } from "../types/verification_types.js";
+import pool, { db } from "../../infrastructure/database/database.js";
+import type {
+    VerificationRecord,
+    VerificationStatus,
+} from "./verification.types.js";
  
 /* every row this module writes is ours */
 const PROVIDER = "didit";
@@ -12,36 +13,6 @@ export type WebhookApplyResult =
     | "duplicate"
     | "unknown_session"
     | "already_approved";
- 
-/**
- * collapses Didit's ten statuses onto the five in verification_status_enum
- *
- * Abandoned and Expired both mean the attempt
- * is dead and needs a fresh session, and Kyc Expired is irrelevant to age since someone verified as over 18 will remain verified (age cant decrease)
- */
-const STATUS_MAP: Record<DiditStatus, VerificationStatus> = {
-    "Not Started": "PENDING",
-    "In Progress": "PENDING",
-    "Awaiting User": "PENDING",
-    Resubmitted: "PENDING",
-    "In Review": "IN_REVIEW",
-    Approved: "APPROVED",
-    Declined: "REJECTED",
-    Abandoned: "EXPIRED",
-    Expired: "EXPIRED",
-    "Kyc Expired": "EXPIRED",
-};
- 
- 
-/**
- * translates a Didit status into the database enum
- *
- * @param status - the status string from a session or webhook
- * @returns the matching verification_status_enum value
- */
-export function toVerificationStatus(status: DiditStatus): VerificationStatus {
-    return STATUS_MAP[status];
-}
  
 export interface VerificationRepo {
      /**

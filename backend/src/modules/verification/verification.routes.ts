@@ -6,20 +6,18 @@ import {
   type RequestHandler,
 } from "express";
 
-import { AppError } from "../../errors/appError.js";
+import { AppError } from "../../shared/errors/app-error.js";
 import {
   createSession,
   verifyWebhookSignature,
   type DiditWebhookEvent,
-} from "../service/id_verification.service.js";
-import {
-  toVerificationStatus,
-  verificationRepo,
-} from "../repository/id_verification.repo.js";
+} from "./didit.client.js";
+import { verificationRepo } from "./verification.repository.js";
+import { toVerificationStatus } from "./verification.service.js";
 import {
   requireApplicationUser,
   validateAccessToken,
-} from "../../middleware/auth.middleware.js";
+} from "../authentication/auth.middleware.js";
 
 /**
  * Returns the internal Rosemarry user ID populated by

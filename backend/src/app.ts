@@ -1,11 +1,11 @@
 import cors from "cors";
 import express, { type Request, type Response } from "express";
 
-import authRouter from "./authentication/route/auth.route.js";
-import pool from "./config/database.js";
-import { env } from "./config/env.js";
-import verificationRouter from "./id_verification/route/id_verification.routes.js";
-import { errorHandler, notFound } from "./middleware/errorHandler.js";
+import { env } from "./infrastructure/config/env.js";
+import pool from "./infrastructure/database/database.js";
+import authRouter from "./modules/authentication/auth.routes.js";
+import verificationRouter from "./modules/verification/verification.routes.js";
+import { errorHandler, notFound } from "./shared/http/error-handler.js";
 
 const app = express();
 

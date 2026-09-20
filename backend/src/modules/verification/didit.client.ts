@@ -1,6 +1,6 @@
 import crypto from "node:crypto";
  
-import { AppError } from "../../errors/appError.js";
+import { AppError } from "../../shared/errors/app-error.js";
  
 /**
  * reads a required environment variable and rejects quoted values

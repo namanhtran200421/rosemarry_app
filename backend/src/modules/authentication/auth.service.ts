@@ -1,9 +1,9 @@
-import { AppError } from "../../errors/appError.js";
-import { authRepo } from "../repository/auth.repo.js";
+import { AppError } from "../../shared/errors/app-error.js";
+import { authRepo } from "./auth.repository.js";
 import type {
   ApplicationSession,
   ApplicationUser,
-} from "../types/auth.types.js";
+} from "./auth.types.js";
 
 /**
  * Checks whether a user is allowed to access.

@@ -1,5 +1,5 @@
-import { db } from "../../config/database.js";
-import type { ApplicationUser } from "../types/auth.types.js";
+import { db } from "../../infrastructure/database/database.js";
+import type { ApplicationUser } from "./auth.types.js";
 
 /**
  * Finds a user by their verified Auth0 user ID.

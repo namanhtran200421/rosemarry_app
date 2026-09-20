@@ -1,7 +1,7 @@
 /**
  * Adds authenticated application identity to Express requests.
  */
-import type { UserRole } from "../authentication/types/auth.types.js";
+import type { UserRole } from "./auth.types.js";
 declare global {
   namespace Express {
     interface Request {

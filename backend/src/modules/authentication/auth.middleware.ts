@@ -1,9 +1,9 @@
 import type { Request, RequestHandler } from "express";
 import { auth } from "express-oauth2-jwt-bearer";
 
-import { findActiveApplicationUser } from "../authentication/service/auth.service.js";
-import { env } from "../config/env.js";
-import { AppError } from "../errors/appError.js";
+import { env } from "../../infrastructure/config/env.js";
+import { AppError } from "../../shared/errors/app-error.js";
+import { findActiveApplicationUser } from "./auth.service.js";
 
 /**
  * Checks Auth0 access tokens before protected route handlers run.

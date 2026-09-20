@@ -1,5 +1,5 @@
 import app from "./app.js";
-import { env } from "./config/env.js";
+import { env } from "./infrastructure/config/env.js";
 
 const server = app.listen(env.port, function () {
   console.log(`Server listening on port ${env.port}`);

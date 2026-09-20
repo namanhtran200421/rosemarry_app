@@ -3,8 +3,8 @@ import { Router, type RequestHandler } from "express";
 import {
   readAuthenticatedSubject,
   validateAccessToken,
-} from "../../middleware/auth.middleware.js";
-import { createApplicationSession } from "../service/auth.service.js";
+} from "./auth.middleware.js";
+import { createApplicationSession } from "./auth.service.js";
 
 /**
  * Creates session data needed by the frontend after login.
