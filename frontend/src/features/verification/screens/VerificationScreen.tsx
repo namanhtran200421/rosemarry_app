@@ -67,7 +67,7 @@ export function resolveVerificationCopy(
   if (status === "PENDING") {
     return {
       title: "Finish verifying your age",
-      body: "Your previous check did not finish. Start a new secure check to continue.",
+      body: "Please continue to complete your check",
       action: "Start a new check",
       actionType: "start",
     };

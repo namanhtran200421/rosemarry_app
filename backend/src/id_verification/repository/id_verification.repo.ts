@@ -112,10 +112,30 @@ export const verificationRepo: VerificationRepo = {
                 sessionUrl,
                 status: "PENDING",
             })
+            .onConflict((conflict) =>
+                conflict.columns(["provider", "providerReference"]).doNothing(),
+            )
             .returningAll()
+            .executeTakeFirst();
+
+        if (inserted !== undefined) {
+            return inserted;
+        }
+
+        const existing = await db
+            .selectFrom("idVerifications")
+            .selectAll()
+            .where("provider", "=", PROVIDER)
+            .where("providerReference", "=", sessionId)
             .executeTakeFirstOrThrow(
-                () => new Error("expected one row from insert into id_verifications, got none"),
+                () => new Error("verification session disappeared after insert conflict"),
             );
+
+        if (existing.userId !== userId) {
+            throw new Error("verification session belongs to a different user");
+        }
+
+        return existing;
     },
 
     async findLatestByUserId(userId) {

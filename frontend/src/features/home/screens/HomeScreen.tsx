@@ -1,6 +1,5 @@
 import { StyleSheet, Text, View } from "react-native";
 
-import { LogoutButton } from "../../auth/components/LogoutButton";
 import {
   colors,
   fonts,
@@ -18,10 +17,6 @@ export function HomeScreen() {
         <Text style={styles.description}>
           You are signed in. Your circles and conversations will live here.
         </Text>
-      </View>
-
-      <View style={styles.logoutArea}>
-        <LogoutButton />
       </View>
     </Screen>
   );
@@ -48,8 +43,5 @@ const styles = StyleSheet.create({
     fontFamily: fonts.regular,
     fontSize: typography.body.fontSize,
     lineHeight: typography.body.lineHeight,
-  },
-  logoutArea: {
-    marginTop: spacing.xxl,
   },
 });

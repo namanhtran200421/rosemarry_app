@@ -1,12 +1,19 @@
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 
 import { useAuthSession } from "../../features/auth/session/AuthSessionContext";
-import { HomeScreen } from "../../features/home/screens/HomeScreen";
+import { useState } from "react";
+
 import { OnboardingFlow } from "../../features/onboarding/OnboardingFlow";
+import type { OnboardingProfile } from "../../features/onboarding/types/onboarding.types";
+import { DEMO_USER } from "../../features/social/data/people";
+import type { CurrentUser } from "../../features/social/types/social.types";
+import { buildUserFromOnboarding } from "../../features/social/utils/build-user";
+
+import { MainAppNavigator } from "./MainAppNavigator";
 
 type AuthenticatedStackParamList = {
   Onboarding: undefined;
-  Home: undefined;
+  Main: undefined;
 };
 
 const Stack = createNativeStackNavigator<AuthenticatedStackParamList>();
@@ -14,7 +21,15 @@ const Stack = createNativeStackNavigator<AuthenticatedStackParamList>();
 /** Routes available after an application session has been established. */
 export function AuthenticatedNavigator() {
   const { completeOnboarding, logout, session } = useAuthSession();
+  const [mainUser, setMainUser] = useState<CurrentUser>(DEMO_USER);
+  const [isNewMember, setIsNewMember] = useState(false);
   const needsOnboarding = session !== null && !session.onboardingCompleted;
+
+  function finishOnboarding(profile: OnboardingProfile): void {
+    setMainUser(buildUserFromOnboarding(profile));
+    setIsNewMember(true);
+    completeOnboarding();
+  }
 
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
@@ -22,7 +37,7 @@ export function AuthenticatedNavigator() {
         <Stack.Screen name="Onboarding">
           {() => (
             <OnboardingFlow
-              onComplete={completeOnboarding}
+              onComplete={finishOnboarding}
               onExit={() => {
                 void logout();
               }}
@@ -30,7 +45,14 @@ export function AuthenticatedNavigator() {
           )}
         </Stack.Screen>
       ) : (
-        <Stack.Screen name="Home" component={HomeScreen} />
+        <Stack.Screen name="Main">
+          {() => (
+            <MainAppNavigator
+              initialUser={mainUser}
+              isNewMember={isNewMember}
+            />
+          )}
+        </Stack.Screen>
       )}
     </Stack.Navigator>
   );
