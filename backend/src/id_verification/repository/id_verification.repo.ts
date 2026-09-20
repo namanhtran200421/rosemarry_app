@@ -102,7 +102,7 @@ export interface VerificationRepo {
  
 export const verificationRepo: VerificationRepo = {
     async createPending(userId, sessionId, sessionUrl) {
-        return db
+        const inserted = await db
             .insertInto("idVerifications")
             .values({
                 userId,
