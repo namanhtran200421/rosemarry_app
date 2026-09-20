@@ -1,41 +1,18 @@
-import { Router, type RequestHandler } from "express";
+import { Router } from "express";
 
-import {
-  readAuthenticatedSubject,
-  validateAccessToken,
-} from "./auth.middleware.js";
-import { createApplicationSession } from "./auth.service.js";
-
-/**
- * Creates session data needed by the frontend after login.
- *
- * The access token has already been checked by `validateAccessToken` before
- * this handler runs. This endpoint may create a database user on their first
- * successful login.
- *
- * @param req - Express request containing the verified Auth0 token.
- * @param res - Express response used to return the application session.
- * @param next - Passes errors to the shared Express error handler.
- * @returns A promise that completes after the response has been sent.
- */
-const createSessionHandler: RequestHandler = async function (req, res, next) {
-  try {
-    const providerUserId = readAuthenticatedSubject(req);
-    const session = await createApplicationSession(providerUserId);
-
-    res.status(200).json(session);
-  } catch (error: unknown) {
-    next(error);
-  }
-};
+import { validateAccessToken } from "./auth.middleware.js";
+import { createSessionHandler } from "./auth.controller.js";
 
 const router = Router();
 
 /**
- * Exchanges a valid Auth0 access token for session information.
- *
- * The response contains `{ userId, role, profileExists }`.
+ * Validates the access token first,
+ * then passes control to the controller.
  */
-router.post("/session", validateAccessToken, createSessionHandler);
+router.post(
+  "/session",
+  validateAccessToken,
+  createSessionHandler
+);
 
 export default router;
