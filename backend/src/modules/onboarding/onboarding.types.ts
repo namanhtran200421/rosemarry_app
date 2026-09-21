@@ -1,53 +1,36 @@
-import type { OnboardingStageEnum } from "../../infrastructure/database/database.types.js";
+// onboarding.types.ts
+
+import type {
+  DatingGoalEnum,
+  OnboardingStageEnum,
+} from "../../infrastructure/database/database.types";
 
 /**
- * All stages that will be return to frontend
- */
-export const ONBOARDING_STAGES = [
-  "BASIC_PROFILE",
-  "PREFERENCES",
-  "INTERESTS",
-  "LIFESTYLE",
-  "PROMPTS",
-  "PHOTOS",
-  "LOCATION",
-  "VERIFICATION",
-  "COMPLETE",
-] as const satisfies readonly OnboardingStageEnum[];
-
-/**
- * All dating goal return to frontend
- */
-export const DATING_GOAL = [
-  "LONG_TERM_RELATIONSHIP",
-  "CASUAL_DATING",
-  "FRIENDSHIP",
-  "UNSURE",
-] as const;
-
-export type OnboardingStage = OnboardingStageEnum;
-export type DatingGoal = (typeof DATING_GOAL)[number];
-
-/**
- * Stater returned to the frontend
+ * Public onboarding stage returned to the frontend.
  *
- * Example:
- *  { stage: PREFERENCES
- *   completedAt: null }
+ * BASIC_PROFILE is not stored in PostgreSQL.
+ * It means the user does not have a profile row yet.
+ */
+export type OnboardingStage =
+  | "BASIC_PROFILE"
+  | OnboardingStageEnum;
+
+/**
+ * Current onboarding state returned by the API.
  */
 export interface OnboardingState {
   stage: OnboardingStage;
-  completed: Date | null;
+  completedAt: Date | null;
 }
 
 /**
- * Request body for the first onboarding screen
+ * Data submitted from the Basic Profile screen.
  */
 export interface BasicProfileInput {
-    displayName: string;
-    dateOfBirth: string;
-    genderId: number | null;
-    bio: string | null;
-    datingGoal: DatingGoal | null;
-    heightCm: number | null;
+  displayName: string;
+  dateOfBirth: string;
+  genderId: number | null;
+  bio: string | null;
+  datingGoal: DatingGoalEnum | null;
+  heightCm: number | null;
 }
