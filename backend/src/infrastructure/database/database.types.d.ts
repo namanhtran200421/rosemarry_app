@@ -13,7 +13,7 @@ export type ConversationTypeEnum = "circle" | "direct";
 
 export type CycleStatusEnum = "active" | "closed" | "forming";
 
-export type DatingGoalEnum = "CASUAL_DATING" | "FRIENDSHIP" | "LONG_TERM_RELATIONSHIP" | "UNSURE";
+export type DatingGoalEnum = "CASUAL_DATING" | "LONG_TERM_RELATIONSHIP" | "NEW_FRIENDS" | "NOT_SURE_YET" | "SHORT_TERM_RELATIONSHIP";
 
 export type Generated<T> = T extends ColumnType<infer S, infer I, infer U>
   ? ColumnType<S, I | undefined, U>
@@ -24,6 +24,8 @@ export type Int8 = ColumnType<string, bigint | number | string, bigint | number 
 export type MessageTypeEnum = "media" | "system" | "text";
 
 export type Numeric = ColumnType<string, number | string, number | string>;
+
+export type OnboardingStageEnum = "BASIC_PROFILE" | "COMPLETE" | "INTERESTS" | "LIFESTYLE" | "LOCATION" | "PHOTOS" | "PREFERENCES" | "PROMPTS" | "VERIFICATION";
 
 export type Timestamp = ColumnType<Date, Date | string, Date | string>;
 
@@ -131,6 +133,7 @@ export interface Medias {
   mediaId: Generated<number>;
   mediaUrl: string;
   mimeType: string;
+  userId: number;
 }
 
 export interface Messages {
@@ -141,6 +144,12 @@ export interface Messages {
   messageId: Generated<Int8>;
   messageType: Generated<MessageTypeEnum>;
   userId: number | null;
+}
+
+export interface ProfileGenderPreferences {
+  createdAt: Generated<Timestamp>;
+  genderId: number;
+  userId: number;
 }
 
 export interface ProfileInterests {
@@ -158,11 +167,12 @@ export interface ProfileLifestyleAnswers {
 }
 
 export interface ProfilePhotos {
+  createdAt: Generated<Timestamp>;
   isPrimary: boolean;
-  mediaId: Generated<number>;
+  mediaId: number;
   photoOrder: number;
-  updatedAt: Timestamp;
-  userId: Generated<number>;
+  updatedAt: Generated<Timestamp>;
+  userId: number;
 }
 
 export interface ProfilePrompts {
@@ -177,13 +187,13 @@ export interface ProfilePrompts {
 export interface Profiles {
   bio: string | null;
   createdAt: Generated<Timestamp>;
-  dateOfBirth: Timestamp;
+  dateOfBirth: Timestamp | null;
   datingGoal: DatingGoalEnum | null;
   displayName: string;
   genderId: number | null;
   heightCm: number | null;
   onboardCompletedAt: Timestamp | null;
-  onboardingStage: string | null;
+  onboardingStage: Generated<OnboardingStageEnum>;
   updatedAt: Generated<Timestamp>;
   userId: number;
 }
@@ -248,6 +258,7 @@ export interface DB {
   lifestyleQuestions: LifestyleQuestions;
   medias: Medias;
   messages: Messages;
+  profileGenderPreferences: ProfileGenderPreferences;
   profileInterests: ProfileInterests;
   profileLifestyleAnswers: ProfileLifestyleAnswers;
   profilePhotos: ProfilePhotos;

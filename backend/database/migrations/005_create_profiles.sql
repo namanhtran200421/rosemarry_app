@@ -7,6 +7,18 @@ CREATE TYPE dating_goal_enum AS ENUM (
     'NOT_SURE_YET'
 );
 
+CREATE TYPE onboarding_stage_enum AS ENUM (
+    'BASIC_PROFILE',
+    'PREFERENCES',
+    'INTERESTS',
+    'LIFESTYLE',
+    'PROMPTS',
+    'PHOTOS',
+    'LOCATION',
+    'VERIFICATION',
+    'COMPLETE'
+);
+
 create table profiles(
     user_id integer NOT NULL,
     date_of_birth date,
@@ -18,7 +30,7 @@ create table profiles(
     created_at timestamptz not null default now(),
     height_cm smallint, 
     onboard_completed_at timestamptz, 
-    onboarding_stage varchar(50) not null,
+    onboarding_stage onboarding_stage_enum not null default 'BASIC_PROFILE',
 
     constraint pk_profiles primary key (user_id),
     constraint fk_profiles_user
@@ -31,4 +43,5 @@ create table profiles(
 
 --migrate:down
 drop table if exists profiles;
+drop type if exists onboarding_stage_enum;
 drop type if exists dating_goal_enum;

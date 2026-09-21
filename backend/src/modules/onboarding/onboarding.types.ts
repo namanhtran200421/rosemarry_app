@@ -1,3 +1,5 @@
+import type { OnboardingStageEnum } from "../../infrastructure/database/database.types.js";
+
 /**
  * All stages that will be return to frontend
  */
@@ -11,7 +13,7 @@ export const ONBOARDING_STAGES = [
   "LOCATION",
   "VERIFICATION",
   "COMPLETE",
-] as const;
+] as const satisfies readonly OnboardingStageEnum[];
 
 /**
  * All dating goal return to frontend
@@ -23,7 +25,7 @@ export const DATING_GOAL = [
   "UNSURE",
 ] as const;
 
-export type OnboardingStage = (typeof ONBOARDING_STAGES)[number];
+export type OnboardingStage = OnboardingStageEnum;
 export type DatingGoal = (typeof DATING_GOAL)[number];
 
 /**
@@ -49,4 +51,3 @@ export interface BasicProfileInput {
     datingGoal: DatingGoal | null;
     heightCm: number | null;
 }
-
