@@ -181,7 +181,9 @@ export interface Profiles {
   datingGoal: DatingGoalEnum | null;
   displayName: string;
   genderId: number | null;
+  heightCm: number | null;
   onboardCompletedAt: Timestamp | null;
+  onboardingStage: string | null;
   updatedAt: Generated<Timestamp>;
   userId: number;
 }

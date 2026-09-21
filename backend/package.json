@@ -4,6 +4,8 @@
    "private": true,
    "scripts": {
       "dev": "tsx watch src/server.ts",
+      "db:types": "kysely-codegen --camel-case --out-file src/infrastructure/database/database.types.d.ts",
+      "db:types:verify": "kysely-codegen --camel-case --out-file src/infrastructure/database/database.types.d.ts --verify",
       "test:db": "tsx src/test_db.ts",
       "build": "tsc",
       "start": "node dist/server.js"
