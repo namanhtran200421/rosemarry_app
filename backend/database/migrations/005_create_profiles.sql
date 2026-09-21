@@ -8,7 +8,6 @@ CREATE TYPE dating_goal_enum AS ENUM (
 );
 
 CREATE TYPE onboarding_stage_enum AS ENUM (
-    'BASIC_PROFILE',
     'PREFERENCES',
     'INTERESTS',
     'LIFESTYLE',
@@ -21,7 +20,7 @@ CREATE TYPE onboarding_stage_enum AS ENUM (
 
 create table profiles(
     user_id integer NOT NULL,
-    date_of_birth date,
+    date_of_birth date not null,
     gender_id integer,
     bio text,
     dating_goal dating_goal_enum,
@@ -30,7 +29,7 @@ create table profiles(
     created_at timestamptz not null default now(),
     height_cm smallint, 
     onboard_completed_at timestamptz, 
-    onboarding_stage onboarding_stage_enum not null default 'BASIC_PROFILE',
+    onboarding_stage onboarding_stage_enum not null default 'PREFERENCES',
 
     constraint pk_profiles primary key (user_id),
     constraint fk_profiles_user

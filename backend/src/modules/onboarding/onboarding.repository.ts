@@ -66,3 +66,13 @@ export async function updateBasicProfile(userId: number, input: BasicProfileInpu
     .where("userId", "=", userId)
     .execute();
 }
+
+
+/**
+ * Checks whether the supplied gender ID exists.
+ */
+export async function genderExists(genderId:number): Promise<boolean> {
+    const gender = await db.selectFrom('genders').select("genderId").where("genderId", "=", genderId).executeTakeFirst();
+    return gender !== undefined;
+}
+
