@@ -8,11 +8,10 @@ import type {
   CurrentCircle,
 } from "./circles.types.js";
 /**
- * SQL subquery. Will be reused. It essentially takes the photo URL of the member.
- * For a circle member:
- * 1. Look at their profile photo
- * 2. Use the primary profile photo if possible
- * 3. Use the lowest photo order otherwise
+ * Selects one display photo for the member in the surrounding Circle query.
+ *
+ * The primary photo is preferred. Photo order provides a deterministic
+ * fallback when the member has no photo marked as primary.
  */
 const memberPhotoUrl = sql<string | null>`(
   select medias.media_url
@@ -24,10 +23,12 @@ const memberPhotoUrl = sql<string | null>`(
 )`.as("photoUrl");
 
 /**
- * Get the circle details by
- * @param userId 
- * @param currentTime 
- * @returns 
+ * Finds every active Circle cycle currently assigned to a user.
+ *
+ *
+ * @param userId - Internal ID of the user whose assignments are requested.
+ * @param currentTime - Time used to determine whether each cycle is current.
+ * @returns The user's current Circle summaries, newest cycle first.
  */
 async function findCurrentByUserId(
   userId: number,
@@ -58,6 +59,17 @@ async function findCurrentByUserId(
     .execute();
 }
 
+/**
+ * Finds a specific active cycle only when the user is a current member.
+ *
+ * This query acts as the database portion of Circle authorization checks.
+ * A missing, inactive, future, expired or departed membership returns null.
+ *
+ * @param cycleId - Weekly Circle cycle being accessed.
+ * @param userId - Internal ID of the requesting user.
+ * @param currentTime - Time used to validate the cycle window.
+ * @returns The Circle summary when access is valid, otherwise null.
+ */
 async function findActiveCycleForMember(
   cycleId: number,
   userId: number,
@@ -90,6 +102,12 @@ async function findActiveCycleForMember(
   return cycle ?? null;
 }
 
+/**
+ * Lists the active members and basic profile data for a Circle cycle.
+ *
+ * @param cycleId - Weekly Circle cycle whose members are requested.
+ * @returns Active member records in join order.
+ */
 async function findMembers(cycleId: number): Promise<CircleMemberRecord[]> {
   return db
     .selectFrom("circleMembers")
@@ -107,6 +125,13 @@ async function findMembers(cycleId: number): Promise<CircleMemberRecord[]> {
     .execute();
 }
 
+/**
+ * Finds the viewable profile fields for one active member of a cycle.
+ *
+ * @param cycleId - Weekly Circle cycle providing the relationship.
+ * @param memberUserId - Internal ID of the member being viewed.
+ * @returns The member profile, or null when they are not an active member.
+ */
 async function findMemberProfile(
   cycleId: number,
   memberUserId: number,
@@ -132,6 +157,12 @@ async function findMemberProfile(
   return member ?? null;
 }
 
+/**
+ * Finds the group-chat conversation attached to a Circle cycle.
+ *
+ * @param cycleId - Weekly Circle cycle whose conversation is requested.
+ * @returns The conversation ID, or null before a conversation exists.
+ */
 async function findCircleConversation(cycleId: number): Promise<number | null> {
   const conversation = await db
     .selectFrom("conversations")
@@ -143,7 +174,14 @@ async function findCircleConversation(cycleId: number): Promise<number | null> {
   return conversation?.conversationId ?? null;
 }
 
-/** Creates the cycle chat when needed and synchronises its active members. */
+/**
+ * Creates the cycle chat when needed and synchronises its active members.
+ *
+ *
+ * @param cycleId - Weekly Circle cycle that owns the conversation.
+ * @returns The existing or newly created conversation ID.
+ * @throws Error when the conversation cannot be read after the insert.
+ */
 async function ensureCircleConversation(cycleId: number): Promise<number> {
   return db.transaction().execute(async (transaction) => {
     await transaction
@@ -187,6 +225,17 @@ async function ensureCircleConversation(cycleId: number): Promise<number> {
   });
 }
 
+/**
+ * Retrieves one cursor-based page of non-deleted conversation messages.
+ *
+ * Results are returned newest first for efficient database pagination. The
+ * service reverses them before sending them to the client.
+ *
+ * @param conversationId - Conversation whose messages are requested.
+ * @param before - Optional exclusive upper message-ID cursor.
+ * @param limit - Maximum number of rows to return.
+ * @returns The requested message rows in descending message-ID order.
+ */
 async function findMessages(
   conversationId: number,
   before: string | undefined,
@@ -216,6 +265,15 @@ async function findMessages(
     .execute();
 }
 
+/**
+ * Inserts a text message and updates the conversation timestamp atomically.
+ *
+ * @param conversationId - Conversation receiving the message.
+ * @param userId - Internal ID of the sender.
+ * @param body - Validated and trimmed message text.
+ * @returns The created message with the sender's display name.
+ * @throws Error when the inserted message cannot be returned.
+ */
 async function insertTextMessage(
   conversationId: number,
   userId: number,
@@ -258,6 +316,13 @@ async function insertTextMessage(
   });
 }
 
+/**
+ * Checks that a message belongs to the expected conversation.
+ *
+ * @param conversationId - Conversation that should contain the message.
+ * @param messageId - PostgreSQL bigint message ID represented as a string.
+ * @returns True when the message belongs to the conversation.
+ */
 async function messageBelongsToConversation(
   conversationId: number,
   messageId: string,
@@ -272,6 +337,14 @@ async function messageBelongsToConversation(
   return message !== undefined;
 }
 
+/**
+ * Advances a member's read marker without allowing it to move backwards.
+ *
+ * @param conversationId - Conversation whose read state is being updated.
+ * @param userId - Internal ID of the member reading the conversation.
+ * @param messageId - Latest message the member has read.
+ * @returns Nothing after the update attempt completes.
+ */
 async function updateLastReadMessage(
   conversationId: number,
   userId: number,
@@ -291,6 +364,7 @@ async function updateLastReadMessage(
     .execute();
 }
 
+/** Database operations used by the Circles service. */
 export const circlesRepo = {
   findCurrentByUserId,
   findActiveCycleForMember,

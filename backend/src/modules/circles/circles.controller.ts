@@ -13,6 +13,13 @@ import {
 const DEFAULT_MESSAGE_LIMIT = 30;
 const MAX_MESSAGE_LIMIT = 50;
 
+/**
+ * Reads the trusted application user ID populated by authentication middleware.
+ *
+ * @param req - Authenticated Express request.
+ * @returns The internal Rosemarry user ID.
+ * @throws AppError with status 401 when application identity is unavailable.
+ */
 function readUserId(req: Parameters<RequestHandler>[0]): number {
   const userId = req.user?.id;
 
@@ -27,6 +34,14 @@ function readUserId(req: Parameters<RequestHandler>[0]): number {
   return userId;
 }
 
+/**
+ * Parses a client value as a positive, safely representable integer.
+ *
+ * @param value - Untrusted route or query-string value.
+ * @param fieldName - Field name included in validation errors.
+ * @returns The validated integer.
+ * @throws AppError with status 400 when the value is invalid.
+ */
 function parsePositiveInteger(value: unknown, fieldName: string): number {
   const parsed = typeof value === "string" ? Number(value) : Number.NaN;
 
@@ -41,6 +56,13 @@ function parsePositiveInteger(value: unknown, fieldName: string): number {
   return parsed;
 }
 
+/**
+ * Parses the optional message page size and enforces the API maximum.
+ *
+ * @param value - Untrusted `limit` query parameter.
+ * @returns The default or validated page size.
+ * @throws AppError with status 400 when the limit is invalid.
+ */
 function parseMessageLimit(value: unknown): number {
   if (value === undefined) {
     return DEFAULT_MESSAGE_LIMIT;
@@ -59,6 +81,14 @@ function parseMessageLimit(value: unknown): number {
   return limit;
 }
 
+/**
+ * Validates a PostgreSQL bigint message ID without converting it to a number.
+ *
+ * @param value - Untrusted cursor or request-body value.
+ * @param fieldName - Field name included in validation errors.
+ * @returns The validated numeric string.
+ * @throws AppError with status 400 when the value is invalid.
+ */
 function parseMessageId(value: unknown, fieldName: string): string {
   if (typeof value !== "string" || !/^[1-9]\d*$/.test(value)) {
     throw new AppError({
@@ -71,6 +101,7 @@ function parseMessageId(value: unknown, fieldName: string): string {
   return value;
 }
 
+/** Returns the authenticated user's current Circle assignments. */
 export const listCurrentCirclesHandler: RequestHandler = async (
   req,
   res,
@@ -87,6 +118,7 @@ export const listCurrentCirclesHandler: RequestHandler = async (
   }
 };
 
+/** Returns one active Circle cycle and its member summaries. */
 export const getCircleHandler: RequestHandler = async (req, res, next) => {
   try {
     const userId = readUserId(req);
@@ -99,6 +131,7 @@ export const getCircleHandler: RequestHandler = async (req, res, next) => {
   }
 };
 
+/** Returns one member profile through a shared active Circle cycle. */
 export const getCircleMemberHandler: RequestHandler = async (
   req,
   res,
@@ -123,6 +156,7 @@ export const getCircleMemberHandler: RequestHandler = async (
   }
 };
 
+/** Returns a validated cursor-based page of Circle chat messages. */
 export const listCircleMessagesHandler: RequestHandler = async (
   req,
   res,
@@ -147,6 +181,7 @@ export const listCircleMessagesHandler: RequestHandler = async (
   }
 };
 
+/** Validates an HTTP request and creates a Circle text message. */
 export const sendCircleMessageHandler: RequestHandler = async (
   req,
   res,
@@ -179,6 +214,7 @@ export const sendCircleMessageHandler: RequestHandler = async (
   }
 };
 
+/** Validates and records the latest Circle message read by the user. */
 export const markCircleReadHandler: RequestHandler = async (
   req,
   res,

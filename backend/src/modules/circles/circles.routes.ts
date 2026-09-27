@@ -15,6 +15,7 @@ import {
 
 const router = Router();
 
+/** All Circle operations require both a valid token and an active user. */
 router.use(validateAccessToken, requireApplicationUser);
 
 router.get("/current", listCurrentCirclesHandler);
