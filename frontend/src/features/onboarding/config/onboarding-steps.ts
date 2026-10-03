@@ -8,6 +8,7 @@ import { GenderStep } from "../screens/GenderStep";
 import { HeightStep } from "../screens/HeightStep";
 import { InterestsStep } from "../screens/InterestsStep";
 import { LifestyleStep } from "../screens/LifestyleStep";
+import { LocationStep } from "../screens/LocationStep";
 import { LookingForStep } from "../screens/LookingForStep";
 import { NameStep } from "../screens/NameStep";
 import { NotificationsStep } from "../screens/NotificationsStep";
@@ -37,5 +38,6 @@ export const ONBOARDING_STEP_SCREENS: Record<
   prompts: PromptsStep,
   circles: CirclesStep,
   notifications: NotificationsStep,
+  location: LocationStep,
   done: DoneStep,
 };

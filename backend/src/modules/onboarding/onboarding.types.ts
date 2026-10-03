@@ -1,31 +1,24 @@
-// onboarding.types.ts
-
 import type {
   DatingGoalEnum,
   OnboardingStageEnum,
 } from "../../infrastructure/database/database.types.js";
 
 /**
- * Public onboarding stage returned to the frontend.
+ * BASIC_PROFILE is an application-only state.
  *
- * BASIC_PROFILE is not stored in PostgreSQL.
- * It means the user does not have a profile row yet.
+ * No profiles row = BASIC_PROFILE.
  */
-export type OnboardingStage =
-  | "BASIC_PROFILE"
-  | OnboardingStageEnum;
+export type OnboardingStage = "BASIC_PROFILE" | OnboardingStageEnum;
 
-/**
- * Current onboarding state returned by the API.
- */
 export interface OnboardingState {
   stage: OnboardingStage;
   completedAt: Date | null;
 }
 
-/**
- * Data submitted from the Basic Profile screen.
- */
+/* -------------------------------------------------------------------------- */
+/*                               Basic Profile                                */
+/* -------------------------------------------------------------------------- */
+
 export interface BasicProfileInput {
   displayName: string;
   dateOfBirth: string;
@@ -33,4 +26,114 @@ export interface BasicProfileInput {
   bio: string | null;
   datingGoal: DatingGoalEnum | null;
   heightCm: number | null;
+}
+
+/* -------------------------------------------------------------------------- */
+/*                                Preferences                                 */
+/* -------------------------------------------------------------------------- */
+
+export interface PreferencesInput {
+  minAge: number;
+  maxAge: number;
+  maxDistanceKm: number;
+  preferredGenderIds: number[];
+}
+
+/* -------------------------------------------------------------------------- */
+/*                                 Interests                                  */
+/* -------------------------------------------------------------------------- */
+
+export interface InterestsInput {
+  interestIds: number[];
+}
+
+export interface InterestOption {
+  interestId: number;
+  interestName: string;
+  slug: string;
+}
+
+/* -------------------------------------------------------------------------- */
+/*                                 Lifestyle                                  */
+/* -------------------------------------------------------------------------- */
+
+export interface LifestyleAnswerInput {
+  questionId: number;
+  optionId: number;
+}
+
+export interface LifestyleInput {
+  answers: LifestyleAnswerInput[];
+}
+
+export interface LifestyleOption {
+  optionId: number;
+  label: string;
+  slug: string;
+  displayOrder: number;
+}
+
+export interface LifestyleQuestion {
+  questionId: number;
+  questionText: string;
+  slug: string;
+  displayOrder: number;
+  options: LifestyleOption[];
+}
+
+/* -------------------------------------------------------------------------- */
+/*                                  Prompts                                   */
+/* -------------------------------------------------------------------------- */
+
+export interface PromptAnswerInput {
+  promptId: number;
+  answer: string;
+  displayOrder: number;
+}
+
+export interface PromptsInput {
+  prompts: PromptAnswerInput[];
+}
+
+export interface PromptOption {
+  promptId: number;
+  promptText: string;
+  slug: string;
+}
+
+/* -------------------------------------------------------------------------- */
+/*                                   Photos                                   */
+/* -------------------------------------------------------------------------- */
+
+export interface ProfilePhotoInput {
+  mediaId: number;
+  photoOrder: number;
+  isPrimary: boolean;
+}
+
+export interface PhotosInput {
+  photos: ProfilePhotoInput[];
+}
+
+/* -------------------------------------------------------------------------- */
+/*                                  Location                                  */
+/* -------------------------------------------------------------------------- */
+
+export interface LocationInput {
+  latitude: number;
+  longitude: number;
+  postcode: string | null;
+  city: string | null;
+  state: string | null;
+  country: string | null;
+}
+
+export interface OnboardingSnapshot {
+  profile: BasicProfileInput | null;
+  preferences: PreferencesInput | null;
+  interestIds: number[];
+  lifestyleAnswers: LifestyleAnswerInput[];
+  prompts: PromptAnswerInput[];
+  photos: ProfilePhotoInput[];
+  location: LocationInput | null;
 }

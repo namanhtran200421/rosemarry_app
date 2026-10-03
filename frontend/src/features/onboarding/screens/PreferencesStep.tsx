@@ -7,6 +7,8 @@ import {
   typography,
 } from "../../../shared/theme/tokens";
 import { AppButton } from "../../../shared/ui/AppButton";
+import { Chip } from "../../../shared/ui/Chip";
+import { ErrorMessage } from "../../../shared/ui/ErrorMessage";
 import { SegmentedControl } from "../../../shared/ui/SegmentedControl";
 import { Slider } from "../../../shared/ui/Slider";
 import { OnboardingScreen } from "../components/OnboardingScreen";
@@ -25,6 +27,10 @@ export function PreferencesStep({
   goNext,
   goBack,
   stepNumber,
+  totalSteps = TOTAL_STEPS,
+  catalogs,
+  busy,
+  error,
 }: StepScreenProps) {
   const preferences = profile.preferences;
 
@@ -35,9 +41,14 @@ export function PreferencesStep({
   return (
     <OnboardingScreen
       stepNumber={stepNumber}
-      totalSteps={TOTAL_STEPS}
+      totalSteps={totalSteps}
       onBack={goBack}
-      footer={<AppButton label="Continue" onPress={goNext} />}
+      footer={
+        <>
+          {error ? <ErrorMessage message={error} /> : null}
+          <AppButton label="Continue" onPress={goNext} busy={busy} />
+        </>
+      }
     >
       <StepTitle
         title="Your basic preferences"
@@ -46,12 +57,44 @@ export function PreferencesStep({
 
       <View style={styles.showMe}>
         <Text style={styles.label}>Show me</Text>
-        <SegmentedControl
-          accessibilityLabel="Show me"
-          options={SHOW_ME}
-          value={preferences.showMe}
-          onChange={(value) => set({ showMe: value })}
-        />
+        {catalogs ? (
+          <View style={styles.genderChoices}>
+            <Chip
+              label="Everyone"
+              selected={profile.preferredGenderIds.length === 0}
+              onPress={() => update("preferredGenderIds", [])}
+            />
+            {catalogs.genders.map((gender) => {
+              const selected = profile.preferredGenderIds.includes(
+                gender.genderId,
+              );
+              return (
+                <Chip
+                  key={gender.genderId}
+                  label={gender.genderName}
+                  selected={selected}
+                  onPress={() =>
+                    update(
+                      "preferredGenderIds",
+                      selected
+                        ? profile.preferredGenderIds.filter(
+                            (id) => id !== gender.genderId,
+                          )
+                        : [...profile.preferredGenderIds, gender.genderId],
+                    )
+                  }
+                />
+              );
+            })}
+          </View>
+        ) : (
+          <SegmentedControl
+            accessibilityLabel="Show me"
+            options={SHOW_ME}
+            value={preferences.showMe}
+            onChange={(value) => set({ showMe: value })}
+          />
+        )}
       </View>
 
       <Slider
@@ -85,6 +128,7 @@ export function PreferencesStep({
 }
 
 const styles = StyleSheet.create({
+  genderChoices: { flexDirection: "row", flexWrap: "wrap", gap: spacing.sm },
   showMe: {
     marginBottom: spacing.xl,
   },

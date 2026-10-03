@@ -8,6 +8,7 @@ import {
   typography,
 } from "../../../shared/theme/tokens";
 import { AppButton } from "../../../shared/ui/AppButton";
+import { ErrorMessage } from "../../../shared/ui/ErrorMessage";
 import { Chip } from "../../../shared/ui/Chip";
 import { OnboardingScreen } from "../components/OnboardingScreen";
 import { StepTitle } from "../components/StepTitle";
@@ -32,45 +33,97 @@ export function LifestyleStep({
   goNext,
   goBack,
   stepNumber,
+  totalSteps = TOTAL_STEPS,
+  catalogs,
+  busy,
+  error,
 }: StepScreenProps) {
+  const questions = catalogs?.lifestyle;
   return (
     <OnboardingScreen
       stepNumber={stepNumber}
-      totalSteps={TOTAL_STEPS}
+      totalSteps={totalSteps}
       onBack={goBack}
-      footer={<AppButton label="Continue" onPress={goNext} />}
+      footer={
+        <>
+          {error ? <ErrorMessage message={error} /> : null}
+          <AppButton label="Continue" onPress={goNext} busy={busy} />
+        </>
+      }
     >
       <StepTitle
         title="Tell us about your lifestyle habits"
         subtitle="This helps match you with people who share your habits"
       />
-      {HABITS.map(({ key, question, icon }, index) => (
-        <View
-          key={key}
-          style={[
-            styles.group,
-            index < HABITS.length - 1 && styles.groupDivided,
-          ]}
-        >
-          <View style={styles.questionRow}>
-            <Feather name={icon} size={20} color={colors.textFaint} />
-            <Text style={styles.question}>{question}</Text>
-          </View>
-          <View style={styles.answers}>
-            {ANSWERS.map((answer) => (
-              <Chip
-                key={answer}
-                label={answer}
-                size="sm"
-                selected={profile.lifestyle[key] === answer}
-                onPress={() =>
-                  update("lifestyle", { ...profile.lifestyle, [key]: answer })
-                }
-              />
-            ))}
-          </View>
-        </View>
-      ))}
+      {questions
+        ? questions.map((item, index) => (
+            <View
+              key={item.questionId}
+              style={[
+                styles.group,
+                index < questions.length - 1 && styles.groupDivided,
+              ]}
+            >
+              <View style={styles.questionRow}>
+                <Text style={styles.question}>{item.questionText}</Text>
+              </View>
+              <View style={styles.answers}>
+                {item.options.map((option) => (
+                  <Chip
+                    key={option.optionId}
+                    label={option.label}
+                    size="sm"
+                    selected={
+                      profile.lifestyleAnswers[item.questionId] ===
+                      option.optionId
+                    }
+                    onPress={() => {
+                      update("lifestyleAnswers", {
+                        ...profile.lifestyleAnswers,
+                        [item.questionId]: option.optionId,
+                      });
+                      const key =
+                        item.slug.charAt(0).toUpperCase() + item.slug.slice(1);
+                      update("lifestyle", {
+                        ...profile.lifestyle,
+                        [key]: option.label,
+                      });
+                    }}
+                  />
+                ))}
+              </View>
+            </View>
+          ))
+        : HABITS.map(({ key, question, icon }, index) => (
+            <View
+              key={key}
+              style={[
+                styles.group,
+                index < HABITS.length - 1 && styles.groupDivided,
+              ]}
+            >
+              <View style={styles.questionRow}>
+                <Feather name={icon} size={20} color={colors.textFaint} />
+                <Text style={styles.question}>{question}</Text>
+              </View>
+              <View style={styles.answers}>
+                {ANSWERS.map((answer) => (
+                  <Chip
+                    key={answer}
+                    label={answer}
+                    size="sm"
+                    selected={profile.lifestyle[key] === answer}
+                    onPress={() =>
+                      update("lifestyle", {
+                        ...profile.lifestyle,
+                        [key]: answer,
+                      })
+                    }
+                  />
+                ))}
+              </View>
+            </View>
+          ))}
     </OnboardingScreen>
   );
 }

@@ -47,7 +47,10 @@ export function GenderMoreStep({
             title={gender}
             selected={profile.gender === gender}
             showIndicator={false}
-            onPress={() => update("gender", gender)}
+            onPress={() => {
+              update("gender", gender);
+              update("genderId", null);
+            }}
           />
         ))}
       </View>

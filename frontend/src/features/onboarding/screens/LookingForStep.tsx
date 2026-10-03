@@ -2,6 +2,7 @@ import { StyleSheet, View } from "react-native";
 
 import { spacing } from "../../../shared/theme/tokens";
 import { AppButton } from "../../../shared/ui/AppButton";
+import { ErrorMessage } from "../../../shared/ui/ErrorMessage";
 import type { IconName } from "../../../shared/ui/Icon";
 import { OptionRow } from "../../../shared/ui/OptionRow";
 import { OnboardingScreen } from "../components/OnboardingScreen";
@@ -52,13 +53,21 @@ export function LookingForStep({
   goNext,
   goBack,
   stepNumber,
+  totalSteps = TOTAL_STEPS,
+  busy,
+  error,
 }: StepScreenProps) {
   return (
     <OnboardingScreen
       stepNumber={stepNumber}
-      totalSteps={TOTAL_STEPS}
+      totalSteps={totalSteps}
       onBack={goBack}
-      footer={<AppButton label="Continue" onPress={goNext} />}
+      footer={
+        <>
+          {error ? <ErrorMessage message={error} /> : null}
+          <AppButton label="Continue" onPress={goNext} busy={busy} />
+        </>
+      }
     >
       <StepTitle
         title="What are you looking for?"

@@ -8,6 +8,7 @@
       "db:types:verify": "kysely-codegen --camel-case --out-file src/infrastructure/database/database.types.d.ts --verify",
       "test:db": "tsx src/test_db.ts",
       "build": "tsc",
+      "test": "tsx --test src/modules/onboarding/*.test.ts",
       "start": "node dist/server.js"
    },
    "dependencies": {

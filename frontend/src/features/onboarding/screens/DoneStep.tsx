@@ -8,21 +8,43 @@ import {
 } from "../../../shared/theme/tokens";
 import { AppButton } from "../../../shared/ui/AppButton";
 import { BrandMark } from "../../../shared/ui/BrandMark";
+import { ErrorMessage } from "../../../shared/ui/ErrorMessage";
 import { OnboardingScreen } from "../components/OnboardingScreen";
 import type { StepScreenProps } from "../types/onboarding.types";
 
-export function DoneStep({ goNext, goBack }: StepScreenProps) {
+export function DoneStep({
+  goNext,
+  goBack,
+  busy,
+  error,
+  catalogs,
+}: StepScreenProps) {
   return (
     <OnboardingScreen
       centered
       onBack={goBack}
-      footer={<AppButton label="Start exploring" onPress={goNext} />}
+      footer={
+        <>
+          {error ? <ErrorMessage message={error} /> : null}
+          <AppButton
+            label={catalogs ? "Finish setup" : "Start exploring"}
+            onPress={goNext}
+            busy={busy}
+          />
+        </>
+      }
     >
       <BrandMark size={130} />
       <Text style={styles.wordmark}>Rosemarry</Text>
       <View style={styles.copy}>
-        <Text style={styles.title}>You&apos;re all set!</Text>
-        <Text style={styles.subtitle}>Time to meet someone special.</Text>
+        <Text style={styles.title}>
+          {catalogs ? "Ready to finish" : "You’re all set!"}
+        </Text>
+        <Text style={styles.subtitle}>
+          {catalogs
+            ? "Confirm your setup to start exploring."
+            : "Time to meet someone special."}
+        </Text>
       </View>
     </OnboardingScreen>
   );
