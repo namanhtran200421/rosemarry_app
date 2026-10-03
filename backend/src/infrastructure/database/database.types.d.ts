@@ -25,7 +25,7 @@ export type MessageTypeEnum = "media" | "system" | "text";
 
 export type Numeric = ColumnType<string, number | string, number | string>;
 
-export type OnboardingStageEnum = "BASIC_PROFILE" | "COMPLETE" | "INTERESTS" | "LIFESTYLE" | "LOCATION" | "PHOTOS" | "PREFERENCES" | "PROMPTS" | "VERIFICATION";
+export type OnboardingStageEnum =  "COMPLETE" | "INTERESTS" | "LIFESTYLE" | "LOCATION" | "PHOTOS" | "PREFERENCES" | "PROMPTS" | "VERIFICATION";
 
 export type Timestamp = ColumnType<Date, Date | string, Date | string>;
 
