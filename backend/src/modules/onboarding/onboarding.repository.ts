@@ -106,7 +106,7 @@ export async function findOnboardingSnapshot(
       .execute(),
     db
       .selectFrom("usersLocation")
-      .select(["latitude", "longitude", "postcode", "city", "state", "country"])
+      .select(["postcode", "city", "state", "country"])
       .where("userId", "=", userId)
       .executeTakeFirst(),
   ]);
@@ -137,13 +137,15 @@ export async function findOnboardingSnapshot(
     })),
     prompts,
     photos,
-    location: location
-      ? {
-          ...location,
-          latitude: Number(location.latitude),
-          longitude: Number(location.longitude),
-        }
-      : null,
+    location:
+      location?.city && location.country
+        ? {
+            city: location.city,
+            country: location.country,
+            state: location.state,
+            postcode: location.postcode,
+          }
+        : null,
   };
 }
 
@@ -425,6 +427,19 @@ export async function findOwnedMedia(
     .execute();
 }
 
+export async function addOwnedMedia(
+  userId: number,
+  mediaUrl: string,
+  mimeType: string,
+  fileSizeBytes: number,
+): Promise<{ mediaId: number; mediaUrl: string }> {
+  return db
+    .insertInto("medias")
+    .values({ userId, mediaUrl, mimeType, fileSizeBytes })
+    .returning(["mediaId", "mediaUrl"])
+    .executeTakeFirstOrThrow();
+}
+
 export async function findOwnedMediaIds(
   userId: number,
   ids: number[],
@@ -468,10 +483,12 @@ export async function saveLocation(
     await advanceStage(trx, userId, nextStage);
     await trx
       .insertInto("usersLocation")
-      .values({ userId, ...input })
+      .values({ userId, ...input, latitude: null, longitude: null })
       .onConflict((conflict) =>
         conflict.column("userId").doUpdateSet({
           ...input,
+          latitude: null,
+          longitude: null,
           locationUpdatedAt: new Date(),
         }),
       )

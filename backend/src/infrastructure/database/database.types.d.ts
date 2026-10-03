@@ -232,9 +232,9 @@ export interface Users {
 export interface UsersLocation {
   city: string | null;
   country: string | null;
-  latitude: Numeric;
+  latitude: Numeric | null;
   locationUpdatedAt: Generated<Timestamp>;
-  longitude: Numeric;
+  longitude: Numeric | null;
   postcode: string | null;
   state: string | null;
   userId: number;

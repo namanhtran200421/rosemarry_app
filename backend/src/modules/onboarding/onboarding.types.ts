@@ -120,12 +120,10 @@ export interface PhotosInput {
 /* -------------------------------------------------------------------------- */
 
 export interface LocationInput {
-  latitude: number;
-  longitude: number;
   postcode: string | null;
-  city: string | null;
+  city: string;
   state: string | null;
-  country: string | null;
+  country: string;
 }
 
 export interface OnboardingSnapshot {

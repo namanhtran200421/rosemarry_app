@@ -28,13 +28,13 @@ import type {
   InterestsInput,
   LifestyleInput,
   LifestyleQuestion,
-  LocationInput,
   OnboardingState,
   PhotosInput,
   PreferencesInput,
   PromptsInput,
 } from "./onboarding.types.js";
 import { furthestStage, requireStageReached } from "./onboarding.stage.js";
+import { parseLocationInput } from "./location-input.js";
 
 const DATING_GOALS = new Set<BasicProfileInput["datingGoal"]>([
   "LONG_TERM_RELATIONSHIP",
@@ -488,44 +488,7 @@ export async function saveLocation(
   input: unknown,
 ): Promise<OnboardingState> {
   const body = objectBody(input, "INVALID_LOCATION");
-  const { latitude, longitude } = body;
-  if (
-    typeof latitude !== "number" ||
-    !Number.isFinite(latitude) ||
-    Math.abs(latitude) > 90 ||
-    typeof longitude !== "number" ||
-    !Number.isFinite(longitude) ||
-    Math.abs(longitude) > 180
-  ) {
-    badRequest(
-      "INVALID_LOCATION",
-      "Latitude and longitude must be valid coordinates",
-    );
-  }
-  const fields = ["postcode", "city", "state", "country"] as const;
-  const location: LocationInput = {
-    latitude,
-    longitude,
-    postcode: null,
-    city: null,
-    state: null,
-    country: null,
-  };
-  for (const field of fields) {
-    const value = body[field] ?? null;
-    if (
-      value !== null &&
-      (typeof value !== "string" ||
-        value.trim().length === 0 ||
-        (field !== "postcode" && value.length > 100))
-    ) {
-      badRequest(
-        "INVALID_LOCATION",
-        `${field} must be a nonempty string or null`,
-      );
-    }
-    location[field] = value === null ? null : (value as string).trim();
-  }
+  const location = parseLocationInput(body);
   const stage = await requireStoredStage(userId);
   const next = nextStage(stage, "LOCATION", "VERIFICATION");
   await saveLocationRepo(userId, location, next);

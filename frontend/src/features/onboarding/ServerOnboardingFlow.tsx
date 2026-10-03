@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
+import * as ImagePicker from "expo-image-picker";
 
 import { AppButton } from "../../shared/ui/AppButton";
 import { ErrorMessage } from "../../shared/ui/ErrorMessage";
@@ -11,6 +12,7 @@ import {
   fetchOnboardingSnapshot,
   fetchOwnedMedia,
   fetchPrompts,
+  uploadOwnedMedia,
   type OnboardingState,
 } from "./api/onboarding-api";
 import { OnboardingScreen } from "./components/OnboardingScreen";
@@ -173,6 +175,39 @@ export function ServerOnboardingFlow({
     }
   }
 
+  async function pickPhoto(): Promise<void> {
+    if (busy || profile.mediaIds.length >= 6) return;
+    setError(null);
+    try {
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ["images"],
+        allowsMultipleSelection: false,
+        quality: 0.8,
+      });
+      if (result.canceled || !result.assets[0]) return;
+
+      setBusy(true);
+      const token = await getAccessToken();
+      const media = await uploadOwnedMedia(token, result.assets[0]);
+      setCatalogs((current) =>
+        current ? { ...current, media: [media, ...current.media] } : current,
+      );
+      setProfile((current) => ({
+        ...current,
+        mediaIds:
+          current.mediaIds.length < 6
+            ? [...current.mediaIds, media.mediaId]
+            : current.mediaIds,
+      }));
+    } catch (cause) {
+      setError(
+        cause instanceof Error ? cause.message : "Could not add your photo.",
+      );
+    } finally {
+      setBusy(false);
+    }
+  }
+
   if (loadError) {
     return (
       <OnboardingScreen
@@ -203,6 +238,7 @@ export function ServerOnboardingFlow({
       update={update}
       catalogs={catalogs}
       onRefreshMedia={() => void refreshMedia()}
+      onPickPhoto={() => void pickPhoto()}
       goNext={() => void advance()}
       goTo={setStepOverride}
       goBack={goBack}

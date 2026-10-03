@@ -60,8 +60,6 @@ export interface OnboardingProfile {
   mediaIds: number[];
   mediaUrls: string[];
   location: {
-    latitude: string;
-    longitude: string;
     postcode: string;
     city: string;
     state: string;
@@ -106,8 +104,6 @@ export const EMPTY_PROFILE: OnboardingProfile = {
   mediaIds: [],
   mediaUrls: [],
   location: {
-    latitude: "",
-    longitude: "",
     postcode: "",
     city: "",
     state: "",
@@ -132,4 +128,5 @@ export interface StepScreenProps {
   error?: string | null;
   catalogs?: OnboardingCatalogs;
   onRefreshMedia?: () => void;
+  onPickPhoto?: () => void;
 }

@@ -24,6 +24,7 @@ import {
   savePreferencesHandler,
   savePromptsHandler,
 } from "./onboarding.controller.js";
+import { receivePhoto, uploadPhoto } from "./media-upload.js";
 
 const router = Router();
 
@@ -45,6 +46,7 @@ router.get("/interests", listInterestsHandler);
 router.get("/lifestyle", listLifestyleHandler);
 router.get("/prompts", listPromptsHandler);
 router.get("/media", listOwnedMediaHandler);
+router.post("/media", receivePhoto, uploadPhoto);
 
 router.put("/preferences", savePreferencesHandler);
 router.put("/interests", saveInterestsHandler);

@@ -34,7 +34,7 @@ describe("server onboarding mapping", () => {
     });
   });
 
-  it("trims prompt answers and optional location fields", () => {
+  it("trims prompt answers and submits city and country without coordinates", () => {
     expect(
       toPrompts({
         ...EMPTY_PROFILE,
@@ -46,17 +46,13 @@ describe("server onboarding mapping", () => {
       toLocation({
         ...EMPTY_PROFILE,
         location: {
-          latitude: "-37.8",
-          longitude: "144.9",
           postcode: " ",
           city: " Melbourne ",
           state: "",
-          country: "Australia",
+          country: " Australia ",
         },
       }),
     ).toEqual({
-      latitude: -37.8,
-      longitude: 144.9,
       postcode: null,
       city: "Melbourne",
       state: null,
@@ -85,7 +81,12 @@ describe("server onboarding mapping", () => {
         lifestyleAnswers: [{ questionId: 1, optionId: 3 }],
         prompts: [{ promptId: 5, answer: "Coffee", displayOrder: 1 }],
         photos: [{ mediaId: 7, photoOrder: 1, isPrimary: true }],
-        location: null,
+        location: {
+          city: "Melbourne",
+          country: "Australia",
+          state: "Victoria",
+          postcode: null,
+        },
       },
       {
         genders: [{ genderId: 2, genderName: "Woman" }],
@@ -114,5 +115,11 @@ describe("server onboarding mapping", () => {
     expect(profile.promptOrder).toEqual([5]);
     expect(profile.mediaIds).toEqual([7]);
     expect(profile.mediaUrls).toEqual(["https://example.test/7.jpg"]);
+    expect(profile.location).toEqual({
+      city: "Melbourne",
+      country: "Australia",
+      state: "Victoria",
+      postcode: "",
+    });
   });
 });

@@ -110,6 +110,10 @@ export function getAuthenticationErrorMessage(
 
       return "That code couldn't be verified. Check it and try again.";
     case "sign-in":
+      if (error instanceof ApplicationSessionError) {
+        return "Your account was verified, but Rosemarry couldn't start your session. Try again.";
+      }
+
       return "We couldn't sign you in. Try again or choose another method.";
     case "logout":
       return "We couldn't log you out. Check your connection and try again.";

@@ -2,21 +2,58 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 process.env.EXPO_PUBLIC_AUTH_MODE = "mock";
 
+vi.mock("expo-file-system/legacy", () => ({
+  FileSystemUploadType: { MULTIPART: 1 },
+  uploadAsync: vi.fn(),
+}));
+
 const {
   fetchOnboardingState,
   fetchOnboardingSnapshot,
   saveBasicProfile,
   savePreferences,
   savePhotos,
+  saveLocation,
   completeOnboarding,
   fetchLifestyle,
   fetchOwnedMedia,
+  uploadOwnedMedia,
   OnboardingApiError,
 } = await import("./onboarding-api");
+const FileSystem = await import("expo-file-system/legacy");
 
 afterEach(() => vi.unstubAllGlobals());
 
 describe("onboarding API", () => {
+  it("uploads a selected photo as authenticated multipart data", async () => {
+    const media = {
+      mediaId: 7,
+      mediaUrl: "http://localhost/uploads/photo.jpg",
+    };
+    vi.mocked(FileSystem.uploadAsync).mockResolvedValue({
+      status: 201,
+      body: JSON.stringify(media),
+      headers: {},
+      mimeType: "application/json",
+    });
+
+    await expect(
+      uploadOwnedMedia("access-token", {
+        uri: "file:///photo.jpg",
+        mimeType: "image/jpeg",
+      }),
+    ).resolves.toEqual(media);
+    expect(FileSystem.uploadAsync).toHaveBeenCalledWith(
+      "/api/v1/onboarding/media",
+      "file:///photo.jpg",
+      expect.objectContaining({
+        headers: { Authorization: "Bearer access-token" },
+        uploadType: 1,
+        fieldName: "photo",
+      }),
+    );
+  });
+
   it("loads the authenticated server stage", async () => {
     const state = { stage: "BASIC_PROFILE", completedAt: null };
     const fetchMock = vi
@@ -112,12 +149,19 @@ describe("onboarding API", () => {
         { mediaId: 2, photoOrder: 2, isPrimary: false },
       ],
     });
+    await saveLocation("access-token", {
+      city: "Melbourne",
+      country: "Australia",
+      state: null,
+      postcode: null,
+    });
     await completeOnboarding("access-token");
     expect(
       fetchMock.mock.calls.map(([url, options]) => [url, options.method]),
     ).toEqual([
       ["/api/v1/onboarding/preferences", "PUT"],
       ["/api/v1/onboarding/photos", "PUT"],
+      ["/api/v1/onboarding/location", "PUT"],
       ["/api/v1/onboarding/complete", "POST"],
     ]);
   });
@@ -158,7 +202,12 @@ describe("onboarding API", () => {
       lifestyleAnswers: [],
       prompts: [],
       photos: [],
-      location: null,
+      location: {
+        city: "Melbourne",
+        country: "Australia",
+        state: "Victoria",
+        postcode: null,
+      },
     };
     const fetchMock = vi
       .fn()

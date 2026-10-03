@@ -1,5 +1,6 @@
 import cors from "cors";
 import express, { type Request, type Response } from "express";
+import { mediaUploadDir } from "./modules/onboarding/media-upload.js";
 
 import { env } from "./infrastructure/config/env.js";
 import pool from "./infrastructure/database/database.js";
@@ -23,12 +24,20 @@ app.use(
 );
 
 app.use(express.json({ limit: "1mb" }));
+app.use("/uploads", express.static(mediaUploadDir, { fallthrough: false }));
 
 app.get("/health", async function (_req: Request, res: Response) {
   try {
-    const result = await pool.query<{ current_time: Date }>(
-      "select now() as current_time",
+    const result = await pool.query<{
+      current_time: Date;
+      users_table: string | null;
+    }>(
+      "select now() as current_time, to_regclass('users')::text as users_table",
     );
+
+    if (!result.rows[0]?.users_table) {
+      throw new Error("Application tables are unavailable");
+    }
 
     res.status(200).json({
       message: "Server and database are running",

@@ -1,6 +1,7 @@
+import { Feather } from "@expo/vector-icons";
 import { StyleSheet, View } from "react-native";
 
-import { spacing } from "../../../shared/theme/tokens";
+import { colors, spacing } from "../../../shared/theme/tokens";
 import { AppButton } from "../../../shared/ui/AppButton";
 import { AppTextInput } from "../../../shared/ui/AppTextInput";
 import { ErrorMessage } from "../../../shared/ui/ErrorMessage";
@@ -19,15 +20,11 @@ export function LocationStep({
   error,
 }: StepScreenProps) {
   const location = profile.location;
-  const latitude = Number(location.latitude);
-  const longitude = Number(location.longitude);
   const valid =
-    location.latitude.trim() !== "" &&
-    location.longitude.trim() !== "" &&
-    Number.isFinite(latitude) &&
-    Math.abs(latitude) <= 90 &&
-    Number.isFinite(longitude) &&
-    Math.abs(longitude) <= 180;
+    location.city.trim().length > 0 &&
+    location.city.trim().length <= 100 &&
+    location.country.trim().length > 0 &&
+    location.country.trim().length <= 100;
   const set = (key: keyof typeof location, value: string) =>
     update("location", { ...location, [key]: value });
 
@@ -49,47 +46,56 @@ export function LocationStep({
       }
     >
       <StepTitle
-        title="Where are you?"
-        subtitle="Enter your location to help us find people nearby."
+        title="Where do you live?"
+        subtitle="Share your general area so people can see where you're based. City and country are required."
       />
       <View style={styles.fields}>
         <AppTextInput
-          label="Latitude"
-          value={location.latitude}
-          onChangeText={(value) => set("latitude", value)}
-          keyboardType="default"
-          placeholder="-37.8136"
-        />
-        <AppTextInput
-          label="Longitude"
-          value={location.longitude}
-          onChangeText={(value) => set("longitude", value)}
-          keyboardType="default"
-          placeholder="144.9631"
-        />
-        <AppTextInput
-          label="City (optional)"
+          label="City *"
           value={location.city}
           onChangeText={(value) => set("city", value)}
+          placeholder="Melbourne"
+          autoCapitalize="words"
+          textContentType="addressCity"
+          maxLength={100}
+          leadingIcon={
+            <Feather name="map-pin" size={18} color={colors.textSecondary} />
+          }
+          returnKeyType="next"
         />
         <AppTextInput
-          label="State (optional)"
-          value={location.state}
-          onChangeText={(value) => set("state", value)}
-        />
-        <AppTextInput
-          label="Postcode (optional)"
-          value={location.postcode}
-          onChangeText={(value) => set("postcode", value)}
-        />
-        <AppTextInput
-          label="Country (optional)"
+          label="Country *"
           value={location.country}
           onChangeText={(value) => set("country", value)}
+          placeholder="Australia"
+          autoCapitalize="words"
+          textContentType="countryName"
+          maxLength={100}
+          returnKeyType="next"
+        />
+        <AppTextInput
+          label="State or region (optional)"
+          value={location.state}
+          onChangeText={(value) => set("state", value)}
+          placeholder="Victoria"
+          autoCapitalize="words"
+          textContentType="addressState"
+          maxLength={100}
+          returnKeyType="next"
+        />
+        <AppTextInput
+          label="Postal code (optional)"
+          value={location.postcode}
+          onChangeText={(value) => set("postcode", value)}
+          placeholder="3000"
+          autoCapitalize="characters"
+          textContentType="postalCode"
+          maxLength={20}
+          returnKeyType="done"
         />
       </View>
     </OnboardingScreen>
   );
 }
 
-const styles = StyleSheet.create({ fields: { gap: spacing.md } });
+const styles = StyleSheet.create({ fields: { gap: spacing.sm } });

@@ -34,6 +34,20 @@ your computer, use `npx expo run:ios --device` or
 for Metro, and use a phone-reachable `EXPO_PUBLIC_API_URL` for backend requests
 instead of `localhost`.
 
+To test real ID verification on an iPhone, leave `EXPO_PUBLIC_AUTH_MODE=auth0`,
+start the backend, and find the Mac's Wi-Fi address with `ipconfig getifaddr en0`.
+Check `http://<Mac-Wi-Fi-address>:3000/health` in the iPhone's Safari browser.
+Then install and start the app with:
+
+```sh
+EXPO_PUBLIC_API_URL="http://$(ipconfig getifaddr en0):3000" npx expo run:ios --device
+```
+
+Allow local network access when iOS asks. Didit's webhook is the main path for
+verification results. The app also asks the backend to reconcile a missing result
+with Didit when you return or tap **Check again**, so local testing can continue
+without a public webhook endpoint.
+
 Use `EXPO_PUBLIC_AUTH_MODE=auth0` with the public Auth0 and API values in `.env`
 to exercise the real sign-in flow. Never put an Auth0 client secret in this
 application.
@@ -53,8 +67,8 @@ environment files are ignored. Do not commit them.
 Backend onboarding now uses stage endpoints and restores saved answers on
 return. The following product integrations still need work before release:
 
-- Profile photos can select existing owned media, but still need an image
-  picker/upload flow for new accounts.
+- Development photo uploads are stored on the backend's local disk. Production
+  needs durable object storage before release.
 - The notification step does not yet request operating-system permission.
 - Terms and privacy content must be replaced with approved legal copy.
 

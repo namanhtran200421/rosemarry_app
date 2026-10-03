@@ -162,12 +162,10 @@ export function fromSnapshot(
       .filter(Boolean),
     location: snapshot.location
       ? {
-          latitude: String(snapshot.location.latitude),
-          longitude: String(snapshot.location.longitude),
           postcode: snapshot.location.postcode ?? "",
-          city: snapshot.location.city ?? "",
+          city: snapshot.location.city,
           state: snapshot.location.state ?? "",
-          country: snapshot.location.country ?? "",
+          country: snapshot.location.country,
         }
       : EMPTY_PROFILE.location,
   };
@@ -196,11 +194,9 @@ export function toPrompts(profile: OnboardingProfile): PromptsInput {
 export function toLocation(profile: OnboardingProfile): LocationInput {
   const optional = (value: string) => value.trim() || null;
   return {
-    latitude: Number(profile.location.latitude),
-    longitude: Number(profile.location.longitude),
     postcode: optional(profile.location.postcode),
-    city: optional(profile.location.city),
+    city: profile.location.city.trim(),
     state: optional(profile.location.state),
-    country: optional(profile.location.country),
+    country: profile.location.country.trim(),
   };
 }

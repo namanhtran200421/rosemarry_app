@@ -78,6 +78,9 @@ const styles = StyleSheet.create({
   header: {
     paddingTop: 6,
     paddingHorizontal: layout.screenPadX,
+    width: "100%",
+    maxWidth: 440,
+    alignSelf: "center",
   },
   progress: {
     marginBottom: 18,
@@ -92,6 +95,10 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     paddingTop: spacing.sm,
     paddingHorizontal: layout.screenPadX,
+    paddingBottom: spacing.xl,
+    width: "100%",
+    maxWidth: 440,
+    alignSelf: "center",
   },
   bodyCentered: {
     alignItems: "center",
@@ -102,5 +109,8 @@ const styles = StyleSheet.create({
     paddingTop: spacing.lg,
     paddingBottom: 28,
     paddingHorizontal: layout.screenPadX,
+    width: "100%",
+    maxWidth: 440,
+    alignSelf: "center",
   },
 });

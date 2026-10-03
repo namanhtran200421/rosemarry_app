@@ -78,9 +78,10 @@ export async function startVerification(
 
 export async function fetchVerificationState(
   accessToken: string,
+  reconcile = false,
 ): Promise<VerificationState> {
   const body = await request(
-    "/api/v1/id-verification/status",
+    `/api/v1/id-verification/status${reconcile ? "?reconcile=1" : ""}`,
     accessToken,
     "GET",
   );

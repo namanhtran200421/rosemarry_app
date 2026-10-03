@@ -9,6 +9,7 @@ import {
 import { AppError } from "../../shared/errors/app-error.js";
 import {
   createSession,
+  getSessionStatus,
   verifyWebhookSignature,
   type DiditWebhookEvent,
 } from "./didit.client.js";
@@ -49,10 +50,33 @@ const getVerificationStatus: RequestHandler = async function (req, res, next) {
   }
 
   try {
-    const [latest, ageVerified] = await Promise.all([
-      verificationRepo.findLatestByUserId(userId),
-      verificationRepo.isUserVerified(userId),
-    ]);
+    let latest = await verificationRepo.findLatestByUserId(userId);
+
+    if (
+      req.query.reconcile === "1" &&
+      latest?.provider === "didit" &&
+      latest.providerReference &&
+      latest.status !== "APPROVED"
+    ) {
+      try {
+        const providerStatus = await getSessionStatus(latest.providerReference);
+        const status = toVerificationStatus(providerStatus);
+
+        if (status !== latest.status) {
+          await verificationRepo.applyWebhookStatus(
+            `reconcile:${latest.providerReference}:${providerStatus}`,
+            latest.providerReference,
+            status,
+          );
+          latest = await verificationRepo.findLatestByUserId(userId);
+        }
+      } catch (error) {
+        // A provider outage must not hide a result already saved by a webhook.
+        console.warn({ scope: "didit", action: "reconcileFailed", userId, error });
+      }
+    }
+
+    const ageVerified = await verificationRepo.isUserVerified(userId);
 
     res.json({ ageVerified, status: latest?.status ?? null });
   } catch (error) {

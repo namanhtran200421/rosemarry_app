@@ -17,6 +17,8 @@ import type {
   InterestsInput,
 } from "./onboarding-contract";
 
+import { isOnboardingState } from "./onboarding-state-validator";
+
 export type * from "./onboarding-contract";
 
 const REQUEST_TIMEOUT_MS = 10_000;
@@ -200,9 +202,9 @@ function isOnboardingSnapshot(value: unknown): value is OnboardingSnapshot {
     ) &&
     (location === null ||
       (record(location) &&
-        typeof location.latitude === "number" &&
-        typeof location.longitude === "number" &&
-        ["postcode", "city", "state", "country"].every(
+        string(location.city) &&
+        string(location.country) &&
+        ["postcode", "state"].every(
           (key) => location[key] === null || string(location[key]),
         )))
   );
@@ -235,6 +237,62 @@ export const fetchOwnedMedia = (token: string) =>
     list(value, isMedia),
   );
 
+export async function uploadOwnedMedia(
+  token: string,
+  photo: { uri: string; fileName?: string | null; mimeType?: string | null },
+): Promise<OwnedMedia> {
+  let response: {
+    status: number;
+    body: string;
+  };
+  try {
+    const FileSystem = await import("expo-file-system/legacy");
+    response = await FileSystem.uploadAsync(
+      `${environment.apiUrl}${base}/media`,
+      photo.uri,
+      {
+        httpMethod: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+        uploadType: FileSystem.FileSystemUploadType.MULTIPART,
+        fieldName: "photo",
+        mimeType: photo.mimeType ?? "image/jpeg",
+      },
+    );
+  } catch (cause) {
+    throw new OnboardingApiError(
+      null,
+      cause instanceof Error
+        ? `Could not upload your photo: ${cause.message}`
+        : "Could not upload your photo.",
+    );
+  }
+
+  if (response.status < 200 || response.status >= 300) {
+    let detail: string | null = null;
+    try {
+      const body: unknown = JSON.parse(response.body);
+      if (record(body) && record(body.error) && string(body.error.message)) {
+        detail = body.error.message;
+      }
+    } catch {
+      // The server may return a non-JSON error body.
+    }
+    throw new OnboardingApiError(
+      response.status,
+      detail ?? `Could not upload your photo (HTTP ${response.status}).`,
+    );
+  }
+
+  let media: unknown;
+  try {
+    media = JSON.parse(response.body);
+  } catch {
+    throw new OnboardingApiError(response.status);
+  }
+  if (!isMedia(media)) throw new OnboardingApiError(response.status);
+  return media;
+}
+
 const save = (path: string, token: string, body: object) =>
   request(`${base}/${path}`, token, "PUT", isOnboardingState, body);
 export const savePreferences = (token: string, body: PreferencesInput) =>
@@ -251,22 +309,3 @@ export const saveLocation = (token: string, body: LocationInput) =>
   save("location", token, body);
 export const completeOnboarding = (token: string) =>
   request(`${base}/complete`, token, "POST", isOnboardingState);
-
-function isOnboardingState(value: unknown): value is OnboardingState {
-  if (!value || typeof value !== "object") return false;
-  const state = value as Record<string, unknown>;
-  return (
-    (state.stage === "BASIC_PROFILE" ||
-      state.stage === "PREFERENCES" ||
-      state.stage === "INTERESTS" ||
-      state.stage === "LIFESTYLE" ||
-      state.stage === "PROMPTS" ||
-      state.stage === "PHOTOS" ||
-      state.stage === "LOCATION" ||
-      state.stage === "VERIFICATION" ||
-      state.stage === "COMPLETE") &&
-    (state.completedAt === null ||
-      (typeof state.completedAt === "string" &&
-        !Number.isNaN(Date.parse(state.completedAt))))
-  );
-}
