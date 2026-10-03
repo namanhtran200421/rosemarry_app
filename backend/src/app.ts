@@ -9,6 +9,7 @@ import verificationRouter from "./modules/verification/verification.routes.js";
 import onboardingRouter from "./modules/onboarding/onboarding.routes.js";
 
 import { errorHandler, notFound } from "./shared/http/error-handler.js";
+import circlesRouter from "./modules/circles/circles.routes.js";
 
 const app = express();
 
@@ -53,6 +54,7 @@ app.get("/health", async function (_req: Request, res: Response) {
 app.use("/api/v1/auth", authRouter);
 app.use("/api/v1/id-verification", verificationRouter);
 app.use("/api/v1/onboarding", onboardingRouter);
+app.use("/api/v1/circles", circlesRouter);
 
 app.use(notFound);
 app.use(errorHandler);
