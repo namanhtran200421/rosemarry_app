@@ -45,5 +45,11 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
       },
     ],
     "expo-font",
+    [
+      "expo-image-picker",
+      {
+        photosPermission: "Choose photos to add to your Rosemarry profile.",
+      },
+    ],
   ],
 });

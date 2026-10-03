@@ -102,3 +102,16 @@ Authenticated navigation is wrapped by `VerificationGate`. It obtains a fresh
 access token through the session contract, launches Didit's hosted camera flow,
 and trusts only the backend status endpoint after returning. Mock auth simulates
 approval locally so frontend development does not depend on Didit.
+
+## Onboarding persistence
+
+Authenticated onboarding loads the server stage and saved snapshot, then saves
+each screen through `/api/v1/onboarding` in backend stage order. Gender,
+interests, lifestyle, and prompt choices come from server catalogs. Completion
+is confirmed by `POST /complete` before entering the main app. Returning
+members load their saved profile snapshot before the main app renders.
+
+The photo step lists existing media owned by the account and links selected
+media through `PUT /photos`. The backend does not yet provide media upload or
+storage, so a new account with no owned media cannot finish that step. Mock
+authentication retains the original local design flow.

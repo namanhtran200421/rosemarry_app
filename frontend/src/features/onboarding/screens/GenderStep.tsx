@@ -21,11 +21,24 @@ export function GenderStep({
   goTo,
   goBack,
   stepNumber,
+  catalogs,
+  totalSteps = TOTAL_STEPS,
 }: StepScreenProps) {
+  const options: { label: string; id: number | null }[] =
+    catalogs?.genders.map((gender) => ({
+      label: gender.genderName,
+      id: gender.genderId,
+    })) ?? GENDERS.map((label) => ({ label, id: null }));
+  if (
+    catalogs &&
+    !options.some((option) => option.label === "Prefer not to say")
+  ) {
+    options.push({ label: "Prefer not to say", id: null });
+  }
   return (
     <OnboardingScreen
       stepNumber={stepNumber}
-      totalSteps={TOTAL_STEPS}
+      totalSteps={totalSteps}
       onBack={goBack}
       footer={
         <AppButton
@@ -37,25 +50,30 @@ export function GenderStep({
     >
       <StepTitle title="What is your gender?" />
       <View style={styles.list}>
-        {GENDERS.map((gender) => (
+        {options.map(({ label, id }) => (
           <OptionRow
-            key={gender}
-            title={gender}
-            selected={profile.gender === gender}
+            key={label}
+            title={label}
+            selected={profile.gender === label}
             showIndicator={false}
-            onPress={() => update("gender", gender)}
+            onPress={() => {
+              update("gender", label);
+              update("genderId", id);
+            }}
           />
         ))}
       </View>
 
-      <Pressable
-        accessibilityRole="link"
-        hitSlop={8}
-        onPress={() => goTo("genderMore")}
-        style={styles.moreLink}
-      >
-        <Text style={styles.moreLabel}>Choose another gender</Text>
-      </Pressable>
+      {!catalogs ? (
+        <Pressable
+          accessibilityRole="link"
+          hitSlop={8}
+          onPress={() => goTo("genderMore")}
+          style={styles.moreLink}
+        >
+          <Text style={styles.moreLabel}>Choose another gender</Text>
+        </Pressable>
+      ) : null}
     </OnboardingScreen>
   );
 }

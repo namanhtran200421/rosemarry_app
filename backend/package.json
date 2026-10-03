@@ -4,8 +4,11 @@
    "private": true,
    "scripts": {
       "dev": "tsx watch src/server.ts",
+      "db:types": "kysely-codegen --camel-case --out-file src/infrastructure/database/database.types.d.ts",
+      "db:types:verify": "kysely-codegen --camel-case --out-file src/infrastructure/database/database.types.d.ts --verify",
       "test:db": "tsx src/test_db.ts",
       "build": "tsc",
+      "test": "tsx --test src/modules/onboarding/*.test.ts",
       "start": "node dist/server.js"
    },
    "dependencies": {
@@ -13,12 +16,15 @@
       "dotenv": "^17.4.2",
       "express": "^5.2.1",
       "express-oauth2-jwt-bearer": "^1.9.2",
+      "file-type": "^22.1.1",
       "kysely": "^0.29.5",
+      "multer": "^2.4.0",
       "pg": "^8.23.0"
    },
    "devDependencies": {
       "@types/cors": "^2.8.19",
       "@types/express": "^5.0.6",
+      "@types/multer": "^2.3.0",
       "@types/node": "^26.2.0",
       "@types/pg": "^8.21.0",
       "dbmate": "^2.35.0",

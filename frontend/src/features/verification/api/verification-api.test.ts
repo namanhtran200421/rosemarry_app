@@ -52,6 +52,24 @@ describe("verification API", () => {
     );
   });
 
+  it("asks the backend to reconcile a missed Didit result", async () => {
+    const fetchMock = vi.fn().mockResolvedValue(
+      new Response(JSON.stringify({ ageVerified: true, status: "APPROVED" }), {
+        status: 200,
+      }),
+    );
+    vi.stubGlobal("fetch", fetchMock);
+
+    await fetchVerificationState("access-token", true);
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/v1/id-verification/status?reconcile=1",
+      expect.objectContaining({
+        headers: { Authorization: "Bearer access-token" },
+      }),
+    );
+  });
+
   it("rejects an invalid status response", async () => {
     vi.stubGlobal(
       "fetch",

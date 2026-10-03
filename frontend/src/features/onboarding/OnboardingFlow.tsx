@@ -1,25 +1,27 @@
+import { environment } from "../../shared/config/environment";
 import { ONBOARDING_STEP_SCREENS } from "./config/onboarding-steps";
 import { useOnboardingFlow } from "./hooks/useOnboardingFlow";
+import { ServerOnboardingFlow } from "./ServerOnboardingFlow";
 import type { OnboardingProfile } from "./types/onboarding.types";
 
-interface OnboardingFlowProps {
-  /** Receives the collected answers when the flow finishes. */
+export interface OnboardingFlowProps {
   onComplete: (profile: OnboardingProfile) => void;
-  /** Leaves onboarding when Back is pressed on the first step. */
   onExit?: () => void;
+  getAccessToken: () => Promise<string>;
 }
 
-/**
- * The design's ten-step sign-up flow plus its Circles, notifications and
- * completion moments. Answers live in memory for the duration of the flow;
- * persisting them is the caller's responsibility.
- */
-export function OnboardingFlow({ onComplete, onExit }: OnboardingFlowProps) {
+export function OnboardingFlow(props: OnboardingFlowProps) {
+  return environment.authMode === "mock" ? (
+    <MockOnboardingFlow {...props} />
+  ) : (
+    <ServerOnboardingFlow {...props} />
+  );
+}
+
+function MockOnboardingFlow({ onComplete, onExit }: OnboardingFlowProps) {
   const { step, stepNumber, profile, update, goNext, goTo, goBack } =
     useOnboardingFlow();
-
   const StepScreen = ONBOARDING_STEP_SCREENS[step];
-
   return (
     <StepScreen
       profile={profile}

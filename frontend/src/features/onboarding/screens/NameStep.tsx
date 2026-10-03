@@ -13,6 +13,7 @@ export function NameStep({
   goNext,
   goBack,
   stepNumber,
+  totalSteps = TOTAL_STEPS,
 }: StepScreenProps) {
   const inputRef = useRef<TextInput>(null);
   const canContinue = profile.name.trim().length > 0;
@@ -25,7 +26,7 @@ export function NameStep({
   return (
     <OnboardingScreen
       stepNumber={stepNumber}
-      totalSteps={TOTAL_STEPS}
+      totalSteps={totalSteps}
       onBack={goBack}
       footer={
         <AppButton label="Continue" disabled={!canContinue} onPress={goNext} />

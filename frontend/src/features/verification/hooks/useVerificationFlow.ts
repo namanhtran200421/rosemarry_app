@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Linking } from "react-native";
+import { AppState, Linking } from "react-native";
 
 import { environment } from "../../../shared/config/environment";
 import {
@@ -15,6 +15,7 @@ import {
 
 const POLL_INTERVAL_MS = 2_000;
 const POLL_TIMEOUT_MS = 90_000;
+const RECONCILE_INTERVAL_MS = 10_000;
 
 type GetAccessToken = () => Promise<string>;
 
@@ -61,7 +62,7 @@ export function useVerificationFlow(
 
     try {
       const token = await getAccessToken();
-      const state = await fetchVerificationState(token);
+      const state = await fetchVerificationState(token, true);
 
       if (activeRef.current) {
         applyState(state);
@@ -75,11 +76,16 @@ export function useVerificationFlow(
 
   const poll = useCallback(async () => {
     const deadline = Date.now() + POLL_TIMEOUT_MS;
+    let nextReconcileAt = 0;
 
     while (activeRef.current && Date.now() < deadline) {
       try {
         const token = await getAccessToken();
-        const state = await fetchVerificationState(token);
+        const reconcile = Date.now() >= nextReconcileAt;
+        if (reconcile) {
+          nextReconcileAt = Date.now() + RECONCILE_INTERVAL_MS;
+        }
+        const state = await fetchVerificationState(token, reconcile);
 
         if (!activeRef.current) {
           return;
@@ -140,6 +146,16 @@ export function useVerificationFlow(
     }, 0);
 
     return () => clearTimeout(initialCheck);
+  }, [refreshRequest]);
+
+  useEffect(() => {
+    const subscription = AppState.addEventListener("change", (state) => {
+      if (state === "active") {
+        void refreshRequest();
+      }
+    });
+
+    return () => subscription.remove();
   }, [refreshRequest]);
 
   return {

@@ -43,6 +43,11 @@ Do not create one-off replacements for these patterns inside a screen.
 - Completion enters the Circle tab in the main five-tab app. Logout asks for confirmation, then returns to Welcome
   only after the user confirms and credential clearing succeeds. A failed logout
   keeps the dialog open with a retry path.
+- The photo step uploads images from the phone, immediately shows each uploaded
+  photo, and requires 2 to 6 selected photos before continuing. The first
+  selected photo leads the profile.
+- The location step asks for city and country as required text fields. State or
+  region and postal code are optional. The app does not ask for coordinates.
 
 ## Async and failure behavior
 

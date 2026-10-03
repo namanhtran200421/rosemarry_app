@@ -75,6 +75,50 @@ export interface DiditWebhookEvent {
     /** present on resolved statuses, not read here since only the status matters */
     decision?: unknown;
 }
+
+const DIDIT_STATUSES: ReadonlySet<string> = new Set([
+    "Not Started",
+    "In Progress",
+    "Awaiting User",
+    "Resubmitted",
+    "In Review",
+    "Approved",
+    "Declined",
+    "Abandoned",
+    "Expired",
+    "Kyc Expired",
+]);
+
+/** Reads the provider's current verdict when a webhook has not reached us. */
+export async function getSessionStatus(sessionId: string): Promise<DiditStatus> {
+    const response = await fetch(
+        `${BASE_URL}/session/${encodeURIComponent(sessionId)}/decision/`,
+        {
+            headers: { "x-api-key": API_KEY },
+            signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
+        },
+    );
+
+    if (!response.ok) {
+        throw new Error(`Didit session lookup failed with HTTP ${response.status}`);
+    }
+
+    const decision: unknown = await response.json();
+
+    if (
+        typeof decision !== "object" ||
+        decision === null ||
+        !("session_id" in decision) ||
+        decision.session_id !== sessionId ||
+        !("status" in decision) ||
+        typeof decision.status !== "string" ||
+        !DIDIT_STATUSES.has(decision.status)
+    ) {
+        throw new Error("Didit returned an invalid session decision");
+    }
+
+    return decision.status as DiditStatus;
+}
  
 /**
  * reserves a verification session with Didit and returns a hosted URL

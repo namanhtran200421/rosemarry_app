@@ -10,6 +10,7 @@ const {
   isAuthenticationCancellation,
 } = await import("./auth-error-message");
 const { AccountCreatedSignInError } = await import("./auth-error-message");
+const { ApplicationSessionError } = await import("../api/auth-api");
 
 describe("authentication error helpers", () => {
   it("treats Auth0 user cancellation as a normal close action", () => {
@@ -23,6 +24,17 @@ describe("authentication error helpers", () => {
   it("returns a safe message for hosted sign-in failures", () => {
     expect(getAuthenticationErrorMessage("sign-in", new Error("secret"))).toBe(
       "We couldn't sign you in. Try again or choose another method.",
+    );
+  });
+
+  it("distinguishes a Rosemarry session failure after provider sign-in", () => {
+    expect(
+      getAuthenticationErrorMessage(
+        "sign-in",
+        new ApplicationSessionError(500),
+      ),
+    ).toBe(
+      "Your account was verified, but Rosemarry couldn't start your session. Try again.",
     );
   });
 

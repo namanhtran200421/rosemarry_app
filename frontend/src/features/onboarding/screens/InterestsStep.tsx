@@ -2,6 +2,7 @@ import { StyleSheet, View } from "react-native";
 
 import { spacing } from "../../../shared/theme/tokens";
 import { AppButton } from "../../../shared/ui/AppButton";
+import { ErrorMessage } from "../../../shared/ui/ErrorMessage";
 import { Chip } from "../../../shared/ui/Chip";
 import type { IconName } from "../../../shared/ui/Icon";
 import { OnboardingScreen } from "../components/OnboardingScreen";
@@ -34,36 +35,75 @@ export function InterestsStep({
   goNext,
   goBack,
   stepNumber,
+  totalSteps = TOTAL_STEPS,
+  catalogs,
+  busy,
+  error,
 }: StepScreenProps) {
-  const selected = profile.interests;
-  const atLimit = selected.length >= MAX_INTERESTS;
+  const count = catalogs
+    ? profile.interestIds.length
+    : profile.interests.length;
+  const atLimit = count >= MAX_INTERESTS;
 
-  function toggle(label: string): void {
-    if (selected.includes(label)) {
+  const options = catalogs
+    ? catalogs.interests.map((interest) => ({
+        label: interest.interestName,
+        id: interest.interestId,
+        icon: undefined,
+      }))
+    : INTERESTS.map((interest) => ({ ...interest, id: null }));
+
+  function toggle(label: string, id: number | null): void {
+    if (catalogs && id !== null) {
+      const active = profile.interestIds.includes(id);
+      if (!active && atLimit) return;
+      update(
+        "interestIds",
+        active
+          ? profile.interestIds.filter((value) => value !== id)
+          : [...profile.interestIds, id],
+      );
       update(
         "interests",
-        selected.filter((item) => item !== label),
+        active
+          ? profile.interests.filter((value) => value !== label)
+          : [...profile.interests, label],
+      );
+      return;
+    }
+    if (profile.interests.includes(label)) {
+      update(
+        "interests",
+        profile.interests.filter((item) => item !== label),
       );
     } else if (!atLimit) {
-      update("interests", [...selected, label]);
+      update("interests", [...profile.interests, label]);
     }
   }
 
   return (
     <OnboardingScreen
       stepNumber={stepNumber}
-      totalSteps={TOTAL_STEPS}
+      totalSteps={totalSteps}
       onBack={goBack}
-      footer={<AppButton label="Continue" onPress={goNext} />}
+      footer={
+        <>
+          {error ? <ErrorMessage message={error} /> : null}
+          <AppButton label="Continue" onPress={goNext} busy={busy} />
+        </>
+      }
     >
       <StepTitle
         title="Your interests"
         subtitle="Select up to 5 of your interests and let everyone know what you're passionate about."
       />
-      <StepCounter selected={selected.length} max={MAX_INTERESTS} />
+      <StepCounter selected={count} max={MAX_INTERESTS} />
       <View style={styles.grid}>
-        {INTERESTS.map(({ label, icon }) => {
-          const isSelected = selected.includes(label);
+        {options.map(({ label, icon, id }) => {
+          const isSelected =
+            id === null
+              ? profile.interests.includes(label)
+              : profile.interestIds.includes(id);
 
           return (
             <View key={label} style={styles.cell}>
@@ -73,7 +113,7 @@ export function InterestsStep({
                 disabled={!isSelected && atLimit}
                 fullWidth
                 icon={icon}
-                onPress={() => toggle(label)}
+                onPress={() => toggle(label, id)}
               />
             </View>
           );

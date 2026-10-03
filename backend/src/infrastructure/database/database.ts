@@ -15,6 +15,11 @@ const pool = new Pool({
   max: 10,
   idleTimeoutMillis: 30_000,
   connectionTimeoutMillis: 10_000,
+  // Neon pooler connections can start with an empty search_path. Initialize
+  // each client before the pool makes it available to Kysely or route handlers.
+  onConnect: async (client) => {
+    await client.query("SET search_path TO public");
+  },
 });
 
 pool.on("error", (error) => {

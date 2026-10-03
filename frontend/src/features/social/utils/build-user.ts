@@ -4,6 +4,7 @@ import { DEMO_USER } from "../data/people";
 import type { CurrentUser } from "../types/social.types";
 
 import { feetToCm } from "./profile-utils";
+import { ageFromDateOfBirth } from "../../onboarding/utils/basic-profile";
 
 const GENDER_LABELS: Record<string, string> = { Woman: "Female", Man: "Male" };
 const LOOKING_IDS: Record<string, string> = {
@@ -14,12 +15,11 @@ const LOOKING_IDS: Record<string, string> = {
   unsure: "Not sure yet",
 };
 
-/**
- * Assembles the member's profile from their onboarding answers. Fields the
- * flow does not ask (bio, location, languages, bonus details) stay empty until
- * the member fills them in from Edit profile.
- */
-export function buildUserFromOnboarding(answers: OnboardingProfile): CurrentUser {
+/** Assembles the member's profile from saved onboarding answers. */
+export function buildUserFromOnboarding(
+  answers: OnboardingProfile,
+  useDemoPhotos = false,
+): CurrentUser {
   const lookingFor =
     LOOKING_IDS[answers.lookingFor] ??
     LOOKING_FOR.find(([title]) => title === answers.lookingFor)?.[0] ??
@@ -28,10 +28,17 @@ export function buildUserFromOnboarding(answers: OnboardingProfile): CurrentUser
   return {
     ...DEMO_USER,
     name: answers.name.trim(),
-    age: answers.age ? Number(answers.age) : undefined,
+    age: ageFromDateOfBirth(answers.dateOfBirth) ?? undefined,
     gender: GENDER_LABELS[answers.gender] ?? answers.gender,
     heightCm: feetToCm(answers.height),
-    location: "",
+    location: [
+      answers.location.city,
+      answers.location.state,
+      answers.location.country,
+    ]
+      .filter(Boolean)
+      .join(", "),
+    bio: answers.bio,
     interests: answers.interests,
     lookingFor,
     lifestyle: {
@@ -43,5 +50,6 @@ export function buildUserFromOnboarding(answers: OnboardingProfile): CurrentUser
     prompts: Object.entries(answers.prompts)
       .filter(([, answer]) => answer.trim().length > 0)
       .map(([q, a]) => ({ q, a: a.trim() })),
+    photos: useDemoPhotos ? DEMO_USER.photos : answers.mediaUrls,
   };
 }

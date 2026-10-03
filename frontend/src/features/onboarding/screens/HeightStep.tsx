@@ -21,13 +21,14 @@ export function HeightStep({
   goNext,
   goBack,
   stepNumber,
+  totalSteps = TOTAL_STEPS,
 }: StepScreenProps) {
   const index = Math.max(0, HEIGHTS.indexOf(profile.height));
 
   return (
     <OnboardingScreen
       stepNumber={stepNumber}
-      totalSteps={TOTAL_STEPS}
+      totalSteps={totalSteps}
       onBack={goBack}
       footer={<AppButton label="Continue" onPress={goNext} />}
     >
