@@ -1,11 +1,20 @@
-import type { RequestHandler } from "express";
+import type { Request, RequestHandler } from "express";
 
-import { readAuthenticatedSubject } from "../authentication/auth.middleware.js";
+import { AppError } from "../../shared/errors/app-error.js";
 
-import {
-  getOnboardingState,
-  saveBasicProfile,
-} from "./onboarding.service.js";
+import { getOnboardingState, saveBasicProfile } from "./onboarding.service.js";
+
+function readUserId(req: Request): number {
+  if (req.user === undefined) {
+    throw new AppError({
+      statusCode: 401,
+      code: "UNAUTHENTICATED",
+      message: "Complete application sign in before accessing onboarding",
+    });
+  }
+
+  return req.user.id;
+}
 
 /**
  * Get the current onboarding stage.
@@ -16,13 +25,7 @@ export const getOnboardingStateHandler: RequestHandler = async (
   next,
 ) => {
   try {
-    // Get the authenticated Auth0 user ID.
-    const providerUserId =
-      readAuthenticatedSubject(req);
-
-    // Ask the service for the current onboarding state.
-    const state =
-      await getOnboardingState(providerUserId);
+    const state = await getOnboardingState(readUserId(req));
 
     res.status(200).json(state);
   } catch (error: unknown) {
@@ -39,17 +42,7 @@ export const saveBasicProfileHandler: RequestHandler = async (
   next,
 ) => {
   try {
-    // Get the authenticated Auth0 user ID.
-    const providerUserId =
-      readAuthenticatedSubject(req);
-
-    // Service handles validation, create/update,
-    // and onboarding progression.
-    const state =
-      await saveBasicProfile(
-        providerUserId,
-        req.body,
-      );
+    const state = await saveBasicProfile(readUserId(req), req.body);
 
     res.status(200).json(state);
   } catch (error: unknown) {

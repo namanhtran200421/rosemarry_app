@@ -3,7 +3,7 @@
 import type {
   DatingGoalEnum,
   OnboardingStageEnum,
-} from "../../infrastructure/database/database.types";
+} from "../../infrastructure/database/database.types.js";
 
 /**
  * Public onboarding stage returned to the frontend.

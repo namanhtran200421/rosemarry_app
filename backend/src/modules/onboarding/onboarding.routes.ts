@@ -2,7 +2,10 @@
 
 import { Router } from "express";
 
-import { validateAccessToken } from "../authentication/auth.middleware.js";
+import {
+  requireApplicationUser,
+  validateAccessToken,
+} from "../authentication/auth.middleware.js";
 
 import {
   getOnboardingStateHandler,
@@ -17,6 +20,7 @@ const router = Router();
 router.get(
   "/state",
   validateAccessToken,
+  requireApplicationUser,
   getOnboardingStateHandler,
 );
 
@@ -26,6 +30,7 @@ router.get(
 router.put(
   "/profile",
   validateAccessToken,
+  requireApplicationUser,
   saveBasicProfileHandler,
 );
 
